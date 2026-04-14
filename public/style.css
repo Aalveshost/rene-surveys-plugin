@@ -1,0 +1,205 @@
+:root {
+    --rs-bg-color: #121214;
+    --rs-panel-bg: #1a1a1e;
+    --rs-border-color: #323238;
+    --rs-text-primary: #e1e1e6;
+    --rs-text-secondary: #a9a9b2;
+    --rs-accent: #8257e5;
+    --rs-accent-hover: #996dff;
+    --rs-success: #04d361;
+    --rs-error: #f75a68;
+    --rs-border-radius: 8px;
+    --rs-transition: all 0.2s ease;
+}
+
+.rene-survey-container {
+    font-family: 'Inter', 'Roboto', sans-serif;
+    background-color: var(--rs-bg-color);
+    color: var(--rs-text-primary);
+    padding: 40px 20px;
+    min-height: 100%;
+}
+
+.survey-form-premium {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--rs-panel-bg);
+    padding: 40px;
+    border-radius: var(--rs-border-radius);
+    border: 1px solid var(--rs-border-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.question-block {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rs-border-color);
+}
+
+.question-block:last-of-type {
+    border-bottom: none;
+    margin-bottom: 40px;
+}
+
+.question-label {
+    display: block;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--rs-text-primary);
+    line-height: 1.5;
+}
+
+.question-label span {
+    color: var(--rs-accent);
+    margin-right: 8px;
+}
+
+.options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 12px 16px;
+    border: 1px solid var(--rs-border-color);
+    border-radius: var(--rs-border-radius);
+    cursor: pointer;
+    transition: var(--rs-transition);
+}
+
+.radio-option:hover {
+    border-color: var(--rs-accent);
+    background: rgba(130, 87, 229, 0.05);
+}
+
+.radio-option input[type="radio"] {
+    appearance: none;
+    background-color: transparent;
+    margin: 0 12px 0 0;
+    font: inherit;
+    color: currentColor;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--rs-text-secondary);
+    border-radius: 50%;
+    display: grid;
+    place-content: center;
+    transition: var(--rs-transition);
+}
+
+.radio-option input[type="radio"]::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--rs-accent);
+}
+
+.radio-option input[type="radio"]:checked {
+    border-color: var(--rs-accent);
+}
+
+.radio-option input[type="radio"]:checked::before {
+    transform: scale(1);
+}
+
+.radio-option input[type="radio"]:focus {
+    outline: max(2px, 0.15em) solid var(--rs-accent);
+    outline-offset: max(2px, 0.15em);
+}
+
+.radio-option label {
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--rs-text-secondary);
+    width: 100%;
+}
+
+.radio-option input[type="radio"]:checked + label {
+    color: var(--rs-text-primary);
+    font-weight: 500;
+}
+
+.text-input-premium {
+    width: 100%;
+    background: #121214;
+    border: 1px solid var(--rs-border-color);
+    border-radius: var(--rs-border-radius);
+    padding: 16px;
+    color: var(--rs-text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: var(--rs-transition);
+    resize: vertical;
+}
+
+.text-input-premium:focus {
+    outline: none;
+    border-color: var(--rs-accent);
+    box-shadow: 0 0 0 2px rgba(130, 87, 229, 0.2);
+}
+
+.text-input-premium::placeholder {
+    color: #5c5c66;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-premium {
+    background: var(--rs-accent);
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--rs-border-radius);
+    cursor: pointer;
+    transition: var(--rs-transition);
+}
+
+.btn-premium:hover:not(:disabled) {
+    background: var(--rs-accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(130, 87, 229, 0.3);
+}
+
+.btn-premium:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.survey-message {
+    margin-top: 24px;
+    padding: 16px;
+    border-radius: var(--rs-border-radius);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+}
+
+.survey-message.hidden {
+    display: none;
+}
+
+.survey-message.success {
+    background: rgba(4, 211, 97, 0.1);
+    color: var(--rs-success);
+    border: 1px solid rgba(4, 211, 97, 0.2);
+}
+
+.survey-message.error {
+    background: rgba(247, 90, 104, 0.1);
+    color: var(--rs-error);
+    border: 1px solid rgba(247, 90, 104, 0.2);
+}
