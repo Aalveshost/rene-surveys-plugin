@@ -143,6 +143,162 @@ function rene_handle_survey_submission() {
     }
 }
 
+// 5. Painel de Fluxo para Admin (Front-end) — visível só para alefxcosta@gmail.com
+add_action('wp_footer', 'formsync_render_admin_flow_panel');
+function formsync_render_admin_flow_panel() {
+    if (!is_user_logged_in()) return;
+
+    $user = wp_get_current_user();
+    if (!in_array('administrator', $user->roles) || $user->user_email !== 'alefxcosta@gmail.com') return;
+    ?>
+    <div id="fswp-flow-panel" style="display:none;">
+        <div class="fswp-panel-header">
+            <span>📊 FormSync Excel WP — Fluxo</span>
+            <button onclick="document.getElementById('fswp-flow-panel').style.display='none'" title="Fechar">✕</button>
+        </div>
+        <div class="fswp-panel-body">
+            <div class="fswp-step">
+                <div class="fswp-step-num">1</div>
+                <div class="fswp-step-info">
+                    <strong>Criar Questionário</strong>
+                    <span>WP Admin → Survey Builder<br>Informe o slug e adicione as questões</span>
+                </div>
+            </div>
+            <div class="fswp-arrow">↓</div>
+            <div class="fswp-step">
+                <div class="fswp-step-num">2</div>
+                <div class="fswp-step-info">
+                    <strong>Linkar com a Página</strong>
+                    <span>Shortcode: <code>[render_survey page_slug="slug"]</code><br>ou Widget no Elementor</span>
+                </div>
+            </div>
+            <div class="fswp-arrow">↓</div>
+            <div class="fswp-step">
+                <div class="fswp-step-num">3</div>
+                <div class="fswp-step-info">
+                    <strong>Usuário Responde</strong>
+                    <span>Respostas salvas no CPT <code>respostas_survey</code></span>
+                </div>
+            </div>
+            <div class="fswp-arrow">↓</div>
+            <div class="fswp-step">
+                <div class="fswp-step-num">4</div>
+                <div class="fswp-step-info">
+                    <strong>Sync com Excel</strong>
+                    <span>Cron roda a cada 1h e envia para a planilha</span>
+                </div>
+            </div>
+            <div class="fswp-footer-note">⚠️ CPTs necessários no JetEngine: <code>questionarios</code> e <code>respostas_survey</code></div>
+        </div>
+    </div>
+
+    <button id="fswp-flow-toggle" onclick="
+        var p = document.getElementById('fswp-flow-panel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+    " title="FormSync — Fluxo do Plugin">📊</button>
+
+    <style>
+    #fswp-flow-toggle {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 99999;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #8257e5;
+        color: #fff;
+        border: none;
+        font-size: 1.3rem;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(130,87,229,0.5);
+        transition: transform 0.2s, background 0.2s;
+    }
+    #fswp-flow-toggle:hover { background: #996dff; transform: scale(1.1); }
+
+    #fswp-flow-panel {
+        position: fixed;
+        bottom: 82px;
+        right: 24px;
+        z-index: 99998;
+        width: 320px;
+        background: #1a1a1e;
+        border: 1px solid #323238;
+        border-radius: 12px;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+        font-family: 'Inter', sans-serif;
+        overflow: hidden;
+        animation: fswp-fadein 0.2s ease;
+    }
+    @keyframes fswp-fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    .fswp-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        background: #8257e5;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
+    .fswp-panel-header button {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        opacity: 0.8;
+        line-height: 1;
+    }
+    .fswp-panel-header button:hover { opacity: 1; }
+
+    .fswp-panel-body { padding: 16px; }
+
+    .fswp-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        background: #121214;
+        border: 1px solid #323238;
+        border-radius: 8px;
+        padding: 12px;
+    }
+    .fswp-step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #8257e5;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .fswp-step-info { display: flex; flex-direction: column; gap: 4px; }
+    .fswp-step-info strong { color: #e1e1e6; font-size: 0.88rem; }
+    .fswp-step-info span { color: #a9a9b2; font-size: 0.78rem; line-height: 1.4; }
+    .fswp-step-info code { background: #323238; padding: 1px 5px; border-radius: 4px; font-size: 0.75rem; color: #996dff; }
+
+    .fswp-arrow { text-align: center; color: #8257e5; font-size: 1.1rem; margin: 4px 0; }
+
+    .fswp-footer-note {
+        margin-top: 12px;
+        padding: 10px;
+        background: rgba(130,87,229,0.08);
+        border: 1px solid rgba(130,87,229,0.2);
+        border-radius: 8px;
+        color: #a9a9b2;
+        font-size: 0.75rem;
+        line-height: 1.5;
+    }
+    .fswp-footer-note code { color: #996dff; background: #323238; padding: 1px 4px; border-radius: 3px; }
+    </style>
+    <?php
+}
+
 // 4. Salvar Questionário (Configuração) via Ajax
 add_action('wp_ajax_rene_save_questionnaire', 'rene_handle_save_questionnaire');
 function rene_handle_save_questionnaire() {
