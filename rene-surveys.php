@@ -91,7 +91,7 @@ function rene_surveys_render_shortcode($atts) {
         $questions_json = get_post_meta(get_the_ID(), 'questions_data', true);
         wp_reset_postdata();
     } else {
-        return '<div class="rene-survey-not-found">Nenhum questionário encontrado para esta página. <br><small>Slug buscada: <code>' . esc_html($slug) . '</code></small></div>';
+        return '<div class="rene-survey-not-found">🚧 Esta pesquisa ainda está em criação. Em breve estará disponível.</div>';
     }
 
     ob_start();
