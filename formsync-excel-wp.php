@@ -18,7 +18,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/excel-sync.php';
 // 0.1 Registrar Widget Elementor (se o Elementor estiver ativo)
 add_action('elementor/widgets/register', function($widgets_manager) {
     require_once plugin_dir_path(__FILE__) . 'includes/elementor-widget.php';
-    $widgets_manager->register(new SafeSurvey_Elementor_Widget());
+    $widgets_manager->register(new FormSync_Elementor_Widget());
 });
 
 // 1. Enfileirar Scripts e Estilos para o Front-end
