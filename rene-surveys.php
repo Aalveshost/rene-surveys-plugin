@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: SafeSurvey WP
- * Description: Sistema dinâmico de pesquisas de segurança do trabalho. Use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong> para exibir um formulário.
+ * Description: Sistema dinâmico de pesquisas de segurança do trabalho. No Elementor, arraste o widget <strong>SafeSurvey WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
  * Version: 1.0.0
  * Author: Alef Alves
  * Author URI: https://aalves.dev
