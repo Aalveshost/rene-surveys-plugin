@@ -1,9 +1,11 @@
 <?php
 /**
- * Plugin Name: Rene Surveys Integration
- * Description: Sistema dinâmico de pesquisas com salvamento em JSON e integração Excel.
- * Version: 1.0
- * Author: Vinci
+ * Plugin Name: SafeSurvey WP
+ * Description: Sistema dinâmico de pesquisas de segurança do trabalho — criação visual de formulários, armazenamento em JSON e sincronização com planilha Excel.
+ * Version: 1.0.0
+ * Author: Alef Alves
+ * Author URI: https://aalves.dev
+ * Text Domain: safesurvey-wp
  */
 
 if (!defined('ABSPATH')) {
