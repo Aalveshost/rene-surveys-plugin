@@ -1,10 +1,10 @@
-# Rene Surveys – Plugin WordPress (Sistema de Pesquisas Dinâmicas)
+# FormSync Excel WP – Plugin WordPress (Sistema de Pesquisas Dinâmicas)
 
 ## Estrutura de Arquivos
 
 ```
 survey-plugin/
-├── rene-surveys.php          # Plugin principal
+├── formsync-excel-wp.php      # Plugin principal
 ├── admin/
 │   ├── builder.php           # HTML da interface de criação de questionários (Admin)
 │   └── builder.js            # Lógica JS do Builder
@@ -20,7 +20,7 @@ survey-plugin/
 ## 1. Instalação
 
 1. Copie a pasta `survey-plugin/` para dentro de `wp-content/plugins/`.
-2. Acesse **WP Admin > Plugins** e ative **Rene Surveys Integration**.
+2. Acesse **WP Admin > Plugins** e ative **FormSync Excel WP**.
 
 ---
 

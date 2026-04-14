@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: SafeSurvey WP
- * Description: Sistema dinâmico de pesquisas de segurança do trabalho. No Elementor, arraste o widget <strong>SafeSurvey WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
+ * Plugin Name: FormSync Excel WP
+ * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
  * Version: 1.0.0
  * Author: Alef Alves
  * Author URI: https://aalves.dev
- * Text Domain: safesurvey-wp
+ * Text Domain: formsync-excel-wp
  */
 
 if (!defined('ABSPATH')) {
@@ -104,8 +104,8 @@ function rene_surveys_render_shortcode($atts) {
     ?>
     <div class="rene-survey-container" data-slug="<?php echo esc_attr($slug); ?>" data-questions="<?php echo esc_attr($questions_json); ?>">
         <div class="safesurvey-brand">
-            <span class="safesurvey-brand-icon">🛡️</span>
-            <span class="safesurvey-brand-name">SafeSurvey <strong>WP</strong></span>
+            <span class="safesurvey-brand-icon">📊</span>
+            <span class="safesurvey-brand-name">FormSync Excel <strong>WP</strong></span>
         </div>
         <div id="rene-survey-app"></div>
     </div>

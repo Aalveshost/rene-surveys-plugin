@@ -1,6 +1,6 @@
 <?php
 /**
- * Widget Elementor: SafeSurvey WP
+ * Widget Elementor: FormSync Excel WP
  * Permite arrastar o formulário de pesquisa direto no Elementor.
  */
 
@@ -8,14 +8,14 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class SafeSurvey_Elementor_Widget extends \Elementor\Widget_Base {
+class FormSync_Elementor_Widget extends \Elementor\Widget_Base {
 
     public function get_name() {
-        return 'safesurvey_wp';
+        return 'formsync_ex_wp';
     }
 
     public function get_title() {
-        return 'SafeSurvey WP';
+        return 'FormSync Excel WP';
     }
 
     public function get_icon() {
@@ -59,7 +59,7 @@ class SafeSurvey_Elementor_Widget extends \Elementor\Widget_Base {
 
         if (empty($slug)) {
             echo '<div style="padding:20px;border:2px dashed #8257e5;color:#8257e5;border-radius:8px;text-align:center;">
-                    🛡️ <strong>SafeSurvey WP</strong><br>
+                    📊 <strong>FormSync Excel WP</strong><br>
                     <small>Informe o slug da pesquisa no painel de configurações do widget.</small>
                   </div>';
             return;
