@@ -7,7 +7,7 @@
 PLUGIN_FILE="formsync-excel-wp.php"
 
 # 1. Lê a versão atual
-CURRENT=$(grep -oP "(?<=\* Version: )\d+\.\d+\.\d+" "$PLUGIN_FILE")
+CURRENT=$(grep -E "^\s*\* Version:" "$PLUGIN_FILE" | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
 echo "📦 Versão atual: $CURRENT"
 
 # 2. Incrementa o patch (ex: 1.0.1 → 1.0.2)
