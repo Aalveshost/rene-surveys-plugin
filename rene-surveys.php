@@ -88,16 +88,10 @@ function rene_surveys_render_shortcode($atts) {
     
     if ($query->have_posts()) {
         $query->the_post();
-        // O JSON com as perguntas deve estar no meta_field 'questions_data'
         $questions_json = get_post_meta(get_the_ID(), 'questions_data', true);
         wp_reset_postdata();
     } else {
-        // Se ainda não tiver questionário mapeado, criar um array dummy para demonstração
-        $dummy = [
-            ['id' => 'q1', 'type' => 'multiple', 'label' => 'Em qual Concessionária você trabalha?', 'options' => ['Entrevias', 'Cristais']],
-            ['id' => 'q2', 'type' => 'text', 'label' => 'Na sua área, algum colega recebeu Medida Disciplinar? Comente.']
-        ];
-        $questions_json = json_encode($dummy);
+        return '<div class="rene-survey-not-found">Nenhum questionário encontrado para esta página. <br><small>Slug buscada: <code>' . esc_html($slug) . '</code></small></div>';
     }
 
     ob_start();
