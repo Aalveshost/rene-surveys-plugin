@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: SafeSurvey WP
- * Description: Sistema dinâmico de pesquisas de segurança do trabalho — criação visual de formulários, armazenamento em JSON e sincronização com planilha Excel.
+ * Description: Sistema dinâmico de pesquisas de segurança do trabalho. Use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong> para exibir um formulário.
  * Version: 1.0.0
  * Author: Alef Alves
  * Author URI: https://aalves.dev
@@ -97,6 +97,10 @@ function rene_surveys_render_shortcode($atts) {
     ob_start();
     ?>
     <div class="rene-survey-container" data-slug="<?php echo esc_attr($slug); ?>" data-questions="<?php echo esc_attr($questions_json); ?>">
+        <div class="safesurvey-brand">
+            <span class="safesurvey-brand-icon">🛡️</span>
+            <span class="safesurvey-brand-name">SafeSurvey <strong>WP</strong></span>
+        </div>
         <div id="rene-survey-app"></div>
     </div>
     <?php
