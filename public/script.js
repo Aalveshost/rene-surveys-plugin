@@ -115,6 +115,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Questões
+        let qNum = 0;
+        // Calcula o número inicial baseado nas páginas anteriores
+        for (let i = 0; i < pi; i++) {
+            qNum += pages[i].filter(q => q.type !== 'section_title').length;
+        }
+
         qs.forEach((q, qi) => {
             const isSection = q.type === 'section_title';
             const label = parseMarkdown(q.label || '');
