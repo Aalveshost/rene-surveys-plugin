@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -24,18 +24,15 @@ add_action('elementor/widgets/register', function($widgets_manager) {
 // 1. Enfileirar Scripts e Estilos para o Front-end
 add_action('wp_enqueue_scripts', 'rene_surveys_enqueue_scripts');
 function rene_surveys_enqueue_scripts() {
-    // Apenas carrega se estiver usando o shortcode
-    global $post;
-    if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'render_survey')) {
-        wp_enqueue_style('rene-surveys-style', plugin_dir_url(__FILE__) . 'public/style.css', array(), '1.0');
-        wp_enqueue_script('rene-surveys-script', plugin_dir_url(__FILE__) . 'public/script.js', array('jquery'), '1.0', true);
-        
-        // Passar dados do PHP para o JS
-        wp_localize_script('rene-surveys-script', 'ReneSurveysData', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('rene_survey_nonce')
-        ));
-    }
+    // Carrega sempre no front-end (Elementor não expe has_shortcode no post_content)
+    wp_enqueue_style('rene-surveys-style', plugin_dir_url(__FILE__) . 'public/style.css', array(), '1.0');
+    wp_enqueue_script('rene-surveys-script', plugin_dir_url(__FILE__) . 'public/script.js', array('jquery'), '1.0', true);
+
+    // Passar dados do PHP para o JS
+    wp_localize_script('rene-surveys-script', 'ReneSurveysData', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('rene_survey_nonce')
+    ));
 }
 
 // 1.1 Enfileirar Scripts para o Admin (Builder)
@@ -110,7 +107,7 @@ function rene_surveys_render_shortcode($atts) {
         <div id="rene-survey-app"></div>
     </div>
     <?php
-    return ob_start() ? ob_get_clean() : '';
+    return ob_get_clean(); // ← corrigido: retorna o buffer já aberto acima
 }
 
 // 3. Endpoint Ajax para receber as respostas
