@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
     --rs-bg-color: #121214;
     --rs-panel-bg: #1a1a1e;
@@ -12,7 +14,7 @@
     --rs-transition: all 0.2s ease;
 }
 
-/* Branding */
+/* ── Branding ─────────────────────────────────────── */
 .safesurvey-brand {
     display: flex;
     align-items: center;
@@ -21,24 +23,19 @@
     padding-bottom: 24px;
     border-bottom: 1px solid var(--rs-border-color);
 }
-
-.safesurvey-brand-icon {
-    font-size: 1.5rem;
-    line-height: 1;
-}
-
+.safesurvey-brand-icon { font-size: 1.5rem; line-height: 1; }
 .safesurvey-brand-name {
     font-size: 1.1rem;
     color: var(--rs-text-secondary);
     letter-spacing: 0.03em;
     font-weight: 400;
 }
-
 .safesurvey-brand-name strong {
     color: var(--rs-accent);
     font-weight: 700;
 }
 
+/* ── Container ───────────────────────────────────── */
 .rene-survey-container {
     font-family: 'Inter', 'Roboto', sans-serif;
     background-color: var(--rs-bg-color);
@@ -57,105 +54,151 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
+/* ── Progress bar ────────────────────────────────── */
+.survey-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 36px;
+}
+.survey-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--rs-border-color);
+    border-radius: 99px;
+    overflow: hidden;
+}
+.survey-progress-fill {
+    height: 100%;
+    background: var(--rs-accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+}
+.survey-progress-label {
+    font-size: .78rem;
+    color: var(--rs-text-secondary);
+    white-space: nowrap;
+}
+
+/* ── Question block ──────────────────────────────── */
 .question-block {
     margin-bottom: 32px;
     padding-bottom: 24px;
     border-bottom: 1px solid var(--rs-border-color);
+    transition: var(--rs-transition);
 }
-
 .question-block:last-of-type {
     border-bottom: none;
     margin-bottom: 40px;
 }
 
+/* Error state */
+.question-block.question-error {
+    padding: 16px;
+    border: 1px solid var(--rs-error);
+    border-radius: var(--rs-border-radius);
+    background: rgba(247, 90, 104, 0.04);
+    animation: rs-shake .3s ease;
+    margin-bottom: 16px;
+}
+@keyframes rs-shake {
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-6px)}
+    75%{transform:translateX(6px)}
+}
+
 .question-label {
     display: block;
-    font-size: 1.125rem;
+    font-size: 1.05rem;
     font-weight: 600;
     margin-bottom: 16px;
     color: var(--rs-text-primary);
     line-height: 1.5;
 }
-
 .question-label span {
     color: var(--rs-accent);
-    margin-right: 8px;
+    margin-right: 6px;
 }
 
+/* ── Radio options — clique na linha inteira ─────── */
 .options-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .radio-option {
     display: flex;
     align-items: center;
-    position: relative;
-    padding: 12px 16px;
+    gap: 12px;
+    padding: 13px 16px;
     border: 1px solid var(--rs-border-color);
     border-radius: var(--rs-border-radius);
     cursor: pointer;
     transition: var(--rs-transition);
+    user-select: none;
 }
-
 .radio-option:hover {
     border-color: var(--rs-accent);
-    background: rgba(130, 87, 229, 0.05);
+    background: rgba(130, 87, 229, 0.06);
 }
 
+/* Esconde o input nativo */
 .radio-option input[type="radio"] {
-    appearance: none;
-    background-color: transparent;
-    margin: 0 12px 0 0;
-    font: inherit;
-    color: currentColor;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Custom radio circle */
+.radio-custom {
     width: 20px;
     height: 20px;
-    border: 2px solid var(--rs-text-secondary);
     border-radius: 50%;
-    display: grid;
-    place-content: center;
+    border: 2px solid var(--rs-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     transition: var(--rs-transition);
+    position: relative;
 }
-
-.radio-option input[type="radio"]::before {
-    content: "";
+.radio-custom::after {
+    content: '';
     width: 10px;
     height: 10px;
     border-radius: 50%;
+    background: var(--rs-accent);
     transform: scale(0);
-    transition: 120ms transform ease-in-out;
-    box-shadow: inset 1em 1em var(--rs-accent);
+    transition: transform 0.15s ease;
 }
 
-.radio-option input[type="radio"]:checked {
+.radio-option input[type="radio"]:checked ~ .radio-custom {
     border-color: var(--rs-accent);
 }
-
-.radio-option input[type="radio"]:checked::before {
+.radio-option input[type="radio"]:checked ~ .radio-custom::after {
     transform: scale(1);
 }
-
-.radio-option input[type="radio"]:focus {
-    outline: max(2px, 0.15em) solid var(--rs-accent);
-    outline-offset: max(2px, 0.15em);
+.radio-option:has(input:checked) {
+    border-color: var(--rs-accent);
+    background: rgba(130, 87, 229, 0.08);
 }
 
-.radio-option label {
-    cursor: pointer;
+.radio-label-text {
     font-size: 1rem;
     color: var(--rs-text-secondary);
-    width: 100%;
+    transition: color .15s;
 }
-
-.radio-option input[type="radio"]:checked + label {
+.radio-option:has(input:checked) .radio-label-text {
     color: var(--rs-text-primary);
     font-weight: 500;
 }
 
+/* ── Textarea ─────────────────────────────────────── */
 .text-input-premium {
     width: 100%;
+    box-sizing: border-box;
     background: #121214;
     border: 1px solid var(--rs-border-color);
     border-radius: var(--rs-border-radius);
@@ -166,67 +209,95 @@
     transition: var(--rs-transition);
     resize: vertical;
 }
-
 .text-input-premium:focus {
     outline: none;
     border-color: var(--rs-accent);
     box-shadow: 0 0 0 2px rgba(130, 87, 229, 0.2);
 }
+.text-input-premium::placeholder { color: #5c5c66; }
 
-.text-input-premium::placeholder {
-    color: #5c5c66;
+/* ── Navigation ──────────────────────────────────── */
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rs-border-color);
 }
 
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
+.btn-nav {
+    background: transparent;
+    border: 1px solid var(--rs-border-color);
+    color: var(--rs-text-secondary);
+    padding: 11px 22px;
+    font-size: .95rem;
+    font-weight: 500;
+    border-radius: var(--rs-border-radius);
+    cursor: pointer;
+    font-family: inherit;
+    transition: var(--rs-transition);
+}
+.btn-nav:hover {
+    border-color: var(--rs-accent);
+    color: var(--rs-text-primary);
 }
 
 .btn-premium {
     background: var(--rs-accent);
     color: #fff;
     border: none;
-    padding: 14px 32px;
-    font-size: 1rem;
+    padding: 12px 28px;
+    font-size: .95rem;
     font-weight: 600;
     border-radius: var(--rs-border-radius);
     cursor: pointer;
+    font-family: inherit;
     transition: var(--rs-transition);
 }
-
 .btn-premium:hover:not(:disabled) {
     background: var(--rs-accent-hover);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(130, 87, 229, 0.3);
 }
-
 .btn-premium:disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }
 
+/* ── Messages ─────────────────────────────────────── */
 .survey-message {
-    margin-top: 24px;
-    padding: 16px;
+    margin-top: 20px;
+    padding: 14px 16px;
     border-radius: var(--rs-border-radius);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     font-weight: 500;
+    font-size: .95rem;
 }
-
-.survey-message.hidden {
-    display: none;
-}
-
+.survey-message.hidden { display: none; }
 .survey-message.success {
-    background: rgba(4, 211, 97, 0.1);
+    background: rgba(4,211,97,0.1);
     color: var(--rs-success);
-    border: 1px solid rgba(4, 211, 97, 0.2);
+    border: 1px solid rgba(4,211,97,0.2);
+}
+.survey-message.error {
+    background: rgba(247,90,104,0.1);
+    color: var(--rs-error);
+    border: 1px solid rgba(247,90,104,0.2);
 }
 
-.survey-message.error {
-    background: rgba(247, 90, 104, 0.1);
-    color: var(--rs-error);
-    border: 1px solid rgba(247, 90, 104, 0.2);
+/* ── Not found ───────────────────────────────────── */
+.rene-survey-not-found {
+    padding: 32px;
+    text-align: center;
+    color: var(--rs-text-secondary);
+    font-family: 'Inter', sans-serif;
+}
+.empty-msg, .error {
+    text-align: center;
+    padding: 32px;
+    color: var(--rs-text-secondary);
+    font-family: 'Inter', sans-serif;
 }

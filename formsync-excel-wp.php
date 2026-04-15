@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.6
+ * Version: 1.0.7
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -406,7 +406,10 @@ function formsync_render_frontend_builder() {
                 </div>
                 <div id="fswp-q-container"></div>
                 <div class="fswp-editor-footer">
-                    <button id="fswp-btn-add-q" class="fswp-btn-ghost">+ Adicionar Questão</button>
+                    <div style="display:flex;gap:8px;">
+                        <button id="fswp-btn-add-q" class="fswp-btn-ghost">+ Questão</button>
+                        <button id="fswp-btn-add-pb" class="fswp-btn-ghost fswp-btn-pb">≡ + Página</button>
+                    </div>
                     <button id="fswp-btn-save" class="fswp-btn-primary">💾 Salvar</button>
                 </div>
             </div>
@@ -541,6 +544,17 @@ function formsync_render_frontend_builder() {
         transition:border-color .15s,color .15s;
     }
     .fswp-btn-ghost:hover{border-color:#8257e5;color:#e1e1e6;}
+    .fswp-btn-pb{border-color:#2d6a4f;color:#52b788;}
+    .fswp-btn-pb:hover{border-color:#52b788 !important;color:#74c69d !important;background:rgba(82,183,136,.05);}
+    .fswp-pb-divider{
+        display:flex;align-items:center;gap:10px;
+        margin:6px 0;padding:10px 14px;
+        background:rgba(82,183,136,.06);border:1px dashed #2d6a4f;
+        border-radius:8px;color:#52b788;font-size:.8rem;font-weight:600;
+    }
+    .fswp-pb-divider span{flex:1;}
+    .fswp-btn-rm-pb{background:transparent;border:none;color:#555;cursor:pointer;font-size:.85rem;padding:2px 6px;border-radius:4px;}
+    .fswp-btn-rm-pb:hover{color:#f75a68;}
     </style>
 
     <script>
@@ -605,21 +619,33 @@ function formsync_render_frontend_builder() {
         }
 
         $i('fswp-btn-add-q').addEventListener('click',()=>{
-            // Pre-populate A-E (5 empty slots)
             questions.push({id:'q_'+Date.now(),label:'',type:'multiple',options:['','','','','']});
             renderQuestions();
-            // Focus the new question label
             setTimeout(()=>{ const labels=$i('fswp-q-container').querySelectorAll('.fswp-q-label'); if(labels.length) labels[labels.length-1].focus(); },50);
+        });
+
+        $i('fswp-btn-add-pb').addEventListener('click',()=>{
+            questions.push({id:'pb_'+Date.now(),type:'page_break'});
+            renderQuestions();
         });
 
         function renderQuestions(){
             const c=$i('fswp-q-container');
             c.innerHTML='';
             if(!questions.length){
-                c.innerHTML='<p class="fswp-bl-empty">Clique em "+ Adicionar Questão" para começar.</p>';
+                c.innerHTML='<p class="fswp-bl-empty">Clique em "+ Questão" para começar.</p>';
                 return;
             }
+            let pageNum=1; let qNum=0;
             questions.forEach((q,qi)=>{
+                if(q.type==='page_break'){
+                    const div=document.createElement('div');
+                    div.className='fswp-pb-divider';
+                    div.innerHTML=`<span>≡ Quebra de Página — início da página ${++pageNum}</span><button class="fswp-btn-rm-pb" data-qi="${qi}" title="Remover quebra">✕</button>`;
+                    c.appendChild(div);
+                    return;
+                }
+                qNum++;
                 const card=document.createElement('div');
                 card.className='fswp-q-card';
 
@@ -637,7 +663,7 @@ function formsync_render_frontend_builder() {
 
                 card.innerHTML=`
                     <div class="fswp-q-header">
-                        <span class="fswp-q-num">${qi+1}</span>
+                        <span class="fswp-q-num">${qNum}</span>
                         <select class="fswp-q-type" data-qi="${qi}">
                             <option value="multiple"${q.type==='multiple'?' selected':''}>Múltipla Escolha</option>
                             <option value="text"${q.type==='text'?' selected':''}>Descritiva</option>
@@ -651,6 +677,7 @@ function formsync_render_frontend_builder() {
                 c.appendChild(card);
             });
 
+            c.querySelectorAll('.fswp-btn-rm-pb').forEach(el=>el.addEventListener('click',function(){ questions.splice(+this.dataset.qi,1); renderQuestions(); }));
             c.querySelectorAll('.fswp-q-label').forEach(el=>el.addEventListener('input',function(){ questions[+this.dataset.qi].label=this.value; }));
             c.querySelectorAll('.fswp-q-type').forEach(el=>el.addEventListener('change',function(){
                 const q=questions[+this.dataset.qi];
