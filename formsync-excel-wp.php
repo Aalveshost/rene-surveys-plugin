@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.46
+ * Version: 1.0.47
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -772,7 +772,7 @@ function formsync_render_frontend_builder() {
                 if(q.type==='section_title'){
                     const div=document.createElement('div');
                     div.className='fswp-section-title-card';
-                    div.setAttribute('draggable','true');
+                    div.setAttribute('draggable','false');
                     div.dataset.qi=qi;
                     div.innerHTML=`<span class="fswp-drag-handle" title="Arraste">⠿</span><input type="text" class="fswp-q-label fswp-section-title-input" data-qi="${qi}" value="${esc(q.label)}" placeholder="Título da seção (ex: A. PERCEPÇÃO SOBRE SUA EMPRESA)"><button class="fswp-btn-rm-q" data-qi="${qi}" title="Remover">🗑</button>`;
                     c.appendChild(div);
@@ -781,7 +781,7 @@ function formsync_render_frontend_builder() {
                 if(q.type==='page_break'){
                     const div=document.createElement('div');
                     div.className='fswp-pb-divider';
-                    div.setAttribute('draggable','true');
+                    div.setAttribute('draggable','false');
                     div.dataset.qi=qi;
                     div.innerHTML=`<span class="fswp-drag-handle" title="Arraste para reposicionar">⠿</span><span>≡ Quebra de Página — início da página ${++pageNum}</span><button class="fswp-btn-rm-pb" data-qi="${qi}" title="Remover quebra">✕</button>`;
                     c.appendChild(div);
@@ -790,7 +790,7 @@ function formsync_render_frontend_builder() {
                 qNum++;
                 const card=document.createElement('div');
                 card.className='fswp-q-card';
-                card.setAttribute('draggable','true');
+                card.setAttribute('draggable','false');
                 card.dataset.qi=qi;
 
                 const optsHtml = q.type==='multiple'
@@ -822,6 +822,14 @@ function formsync_render_frontend_builder() {
                 c.appendChild(card);
             });
 
+            // Ativa drag apenas pelo handle
+            c.querySelectorAll('.fswp-drag-handle').forEach(h => {
+                const parent = h.closest('[draggable]');
+                h.addEventListener('mousedown', () => { parent.setAttribute('draggable', 'true'); });
+                h.addEventListener('mouseup',   () => { parent.setAttribute('draggable', 'false'); });
+                h.addEventListener('mouseleave',() => { parent.setAttribute('draggable', 'false'); });
+            });
+
             // ── Drag & Drop ──────────────────────────────────────────────
             let dragSrcIdx = null;
             c.querySelectorAll('[draggable]').forEach(el=>{
@@ -832,6 +840,7 @@ function formsync_render_frontend_builder() {
                 });
                 el.addEventListener('dragend',function(){
                     this.classList.remove('dragging');
+                    this.setAttribute('draggable', 'false'); // Reseta ao terminar
                     c.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));
                 });
                 el.addEventListener('dragover',function(e){
