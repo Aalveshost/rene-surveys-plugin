@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
             <div class="survey-intro-body">
                 ${config.subtitle    ? `<h2 class="survey-intro-subtitle">${escHtml(config.subtitle)}</h2>` : ''}
-                ${config.description ? `<div class="survey-intro-desc">${escHtml(config.description).replace(/\n/g, '<br>')}</div>` : ''}
+                ${config.description ? `<div class="survey-intro-desc">${escHtmlWithLineBreaks(config.description)}</div>` : ''}
                 ${instHtml}
                 ${config.period      ? `<p class="survey-intro-period">Período de aplicação da pesquisa: ${escHtml(config.period)}</p>` : ''}
                 <div class="survey-intro-footer">
@@ -286,6 +286,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function escHtml(s) {
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function escHtmlWithLineBreaks(s) {
+        return escHtml(s).replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
     }
 
     renderPage(0);
