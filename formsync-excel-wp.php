@@ -92,7 +92,9 @@ function rene_surveys_render_shortcode($atts) {
     if ($query->have_posts()) {
         $query->the_post();
         $questions_json = get_post_meta(get_the_ID(), 'questions_data', true);
-        $config_json    = get_post_meta(get_the_ID(), 'survey_config', true) ?: '{}';
+        $config_json    = get_post_meta(get_the_ID(), 'survey_config', true)
+                       ?: get_post_meta(get_the_ID(), 'survey_description', true)
+                       ?: '{}';
         wp_reset_postdata();
     } else {
         return '<div class="rene-survey-not-found">🚧 Esta pesquisa ainda está em criação. Em breve estará disponível.</div>';
@@ -337,14 +339,10 @@ function rene_handle_save_questionnaire() {
     if (!is_wp_error($post_id)) {
         update_post_meta($post_id, 'page_slug', $slug);
         update_post_meta($post_id, 'questions_data', $data);
-        // Salva config da pesquisa (página de apresentação)
-        if (!empty($_POST['config_data'])) {
-            update_post_meta($post_id, 'survey_config', stripslashes($_POST['config_data']));
-        }
-        // Salva config completa no meta field survey_description (JSON)
-        if (!empty($_POST['survey_description'])) {
-            update_post_meta($post_id, 'survey_description', stripslashes($_POST['survey_description']));
-        }
+        // Salva config no survey_config (interno) E no survey_description (JetEngine)
+        $config_raw = isset($_POST['config_data']) ? stripslashes($_POST['config_data']) : '{}';
+        update_post_meta($post_id, 'survey_config', $config_raw);
+        update_post_meta($post_id, 'survey_description', $config_raw);
         wp_send_json_success(array('message' => 'Questionário salvo!', 'id' => $post_id));
     } else {
         wp_send_json_error(array('message' => 'Erro ao criar/atualizar Post.'));
@@ -374,7 +372,9 @@ function formsync_ajax_get_surveys() {
             'title'     => $post->post_title,
             'slug'      => get_post_meta($post->ID, 'page_slug', true),
             'questions' => get_post_meta($post->ID, 'questions_data', true) ?: '[]',
-            'config'    => get_post_meta($post->ID, 'survey_config', true)  ?: '{}',
+            'config'    => get_post_meta($post->ID, 'survey_config', true)
+                        ?: get_post_meta($post->ID, 'survey_description', true)
+                        ?: '{}',
         ];
     }
     wp_send_json_success($surveys);
