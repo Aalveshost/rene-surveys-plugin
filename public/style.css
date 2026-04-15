@@ -43,9 +43,14 @@
     justify-content: flex-end;
 }
 .survey-intro-logo {
-    max-height: 140px;
+    height: 75px;
+    width: auto;
     max-width: 100%;
     object-fit: contain;
+    background: #fff;
+    border-radius: 6px;
+    padding: 8px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 /* H1 no header */
