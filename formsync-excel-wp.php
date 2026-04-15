@@ -341,9 +341,9 @@ function rene_handle_save_questionnaire() {
         if (!empty($_POST['config_data'])) {
             update_post_meta($post_id, 'survey_config', stripslashes($_POST['config_data']));
         }
-        // Salva descrição formatada no meta field survey_description
+        // Salva config completa no meta field survey_description (JSON)
         if (!empty($_POST['survey_description'])) {
-            update_post_meta($post_id, 'survey_description', sanitize_textarea_field($_POST['survey_description']));
+            update_post_meta($post_id, 'survey_description', stripslashes($_POST['survey_description']));
         }
         wp_send_json_success(array('message' => 'Questionário salvo!', 'id' => $post_id));
     } else {
@@ -864,21 +864,12 @@ A sua participação é fundamental;" style="max-height:160px;"></textarea>
             const btn=this;
             btn.disabled=true; btn.textContent='Salvando…';
 
-            // Montar descrição formatada com quebras de linha
-            const surveyDescription = [
-                config.title,
-                config.subtitle,
-                config.description,
-                config.instructions.length ? 'Instruções:\n' + config.instructions.join('\n') : '',
-                config.period ? 'Período: ' + config.period : ''
-            ].filter(v => v).join('\n\n');
-
             post({
                 action:'rene_save_questionnaire',nonce:NONCE,slug,
                 is_new: isNew ? 1 : 0,
                 questions_data:JSON.stringify(payload),
                 config_data:JSON.stringify(config),
-                survey_description:surveyDescription
+                survey_description:JSON.stringify(config)
             }).then(res=>{
                 if(res.success){
                     btn.textContent='✅ Salvo!';
