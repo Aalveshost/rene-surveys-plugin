@@ -43,14 +43,15 @@
     justify-content: flex-end;
 }
 .survey-intro-logo {
-    height: 90px;
-    width: 260px;
-    max-width: 100%;
-    object-fit: contain;
-    background: #fff;
-    border-radius: 6px;
-    padding: 10px 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    height: 100px !important;
+    width: 260px !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    background: #fff !important;
+    border-radius: 6px !important;
+    padding: 8px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    box-sizing: border-box !important;
 }
 
 /* H1 no header */
