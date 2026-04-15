@@ -87,14 +87,24 @@
 .survey-desc-h2 {
     display: block;
     font-family: "Tahoma", sans-serif;
-    font-size: 21px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 500;
     color: #0A57BE;
     margin: 8px 0 4px;
 }
 .survey-text-blue {
     color: #0A57BE;
     font-weight: 600;
+}
+.section-label {
+    font-family: "Tahoma", sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    color: #0A57BE !important;
+    line-height: 1.2 !important;
+    margin-block-end: 1rem !important;
+    margin-block-start: .5rem !important;
+    display: block;
 }
 
 /* Descrição */
@@ -480,3 +490,48 @@
     margin-right: 4px;
 }
 @keyframes rs-spin { to { transform: rotate(360deg); } }
+
+/* ── Mobile UI Adjustments ───────────────────────────── */
+@media (max-width: 600px) {
+    .survey-intro-header {
+        padding: 20px 16px;
+    }
+    .survey-intro-logos {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    .survey-intro-logo-col {
+        width: 100%;
+        justify-content: center !important;
+    }
+    .survey-intro-logo {
+        width: 100% !important;
+        max-width: 240px !important;
+        height: auto !important;
+        min-height: 60px;
+    }
+    .survey-intro-title {
+        font-size: 24px !important;
+        text-align: center;
+    }
+    .survey-intro-body {
+        padding: 24px 16px;
+    }
+    .survey-intro-subtitle {
+        font-size: 1.1rem;
+        text-align: center;
+    }
+    .form-navigation {
+        flex-direction: column-reverse;
+        gap: 15px;
+    }
+    .btn-nav, .btn-premium {
+        width: 100%;
+        margin-right: 0 !important;
+    }
+    .survey-intro-footer {
+        justify-content: center;
+    }
+}
