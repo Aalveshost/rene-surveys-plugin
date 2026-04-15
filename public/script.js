@@ -309,7 +309,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!s) return '';
         return escHtml(s)
             .replace(/\*\*\*\*\*\*(.+?)\*\*\*\*\*\*/g, '<span class="survey-text-blue">$1</span>')
-            .replace(/\*\*\*(.+?)\*\*\*/g, '<strong>$1</strong>')
+            .replace(/\*\*\*\*(.+?)\*\*\*\*/g, '<strong>$1</strong>')
+            .replace(/\*\*\*(.+?)\*\*\*/g, '<span class="survey-text-blue">$1</span>')
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     }
 
