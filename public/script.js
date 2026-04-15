@@ -96,6 +96,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Renderiza a página atual ───────────────────────────────────────
     function renderPage(pi) {
         const qs      = pages[pi];
+        if (!qs) return;
+        
+        scrollToForm();
+
         const isFirst = pi === 0;
         const isLast  = pi === pages.length - 1;
         const total   = pages.length;
@@ -140,9 +144,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const checked = answers[q.id] === opt ? 'checked' : '';
                     html += `
                     <label class="radio-option" for="${id}">
-                        <input type="radio" id="${id}" name="q_${q.id}" value="${opt}" ${checked}>
+                        <input type="radio" id="${id}" name="q_${q.id}" value="${escHtml(opt)}" ${checked}>
                         <span class="radio-custom"></span>
-                        <span class="radio-label-text">${opt}</span>
+                        <span class="radio-label-text">${escHtml(opt)}</span>
                     </label>`;
                 });
                 html += `</div>`;
