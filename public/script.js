@@ -68,7 +68,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById('fswp-btn-seguinte').addEventListener('click', () => {
             onIntro = false;
-            renderPage(0);
+            if (pages.length) {
+                renderPage(0);
+            } else {
+                appDiv.innerHTML = '<p class="empty-msg">Nenhuma pergunta encontrada.</p>';
+            }
         });
     }
 
@@ -289,7 +293,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function escHtmlWithLineBreaks(s) {
-        return String(s).split('\n').map(line => escHtml(line)).join('<br>');
+        // Normaliza tanto \n real quanto \n literal (legado)
+        return String(s).replace(/\\n/g, '\n').split('\n').map(line => escHtml(line)).join('<br>');
     }
 
     renderPage(0);
