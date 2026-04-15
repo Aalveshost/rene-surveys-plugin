@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.11
+ * Version: 1.0.12
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -479,7 +479,7 @@ A sua participação é fundamental;"></textarea>
     }
     #fswp-bl-modal{
         background:#1a1a1e;border:1px solid #323238;border-radius:14px;
-        width:100%;max-width:620px;max-height:88vh;
+        width:100%;max-width:900px;max-height:88vh;
         display:flex;flex-direction:column;
         box-shadow:0 24px 64px rgba(0,0,0,.7);
         overflow:hidden;font-family:'Inter',sans-serif;
@@ -599,6 +599,18 @@ A sua participação é fundamental;"></textarea>
     .fswp-pb-divider span{flex:1;}
     .fswp-btn-rm-pb{background:transparent;border:none;color:#555;cursor:pointer;font-size:.85rem;padding:2px 6px;border-radius:4px;}
     .fswp-btn-rm-pb:hover{color:#f75a68;}
+    /* Drag & drop */
+    .fswp-drag-handle{
+        cursor:grab;color:#444;font-size:1rem;padding:0 6px;
+        flex-shrink:0;user-select:none;transition:color .15s;
+    }
+    .fswp-drag-handle:hover{color:#8257e5;}
+    .fswp-drag-handle:active{cursor:grabbing;}
+    .fswp-q-card[draggable]{transition:opacity .15s;}
+    .fswp-q-card.dragging,.fswp-pb-divider.dragging{opacity:.35;}
+    .fswp-q-card.drag-over,.fswp-pb-divider.drag-over{
+        border-top:2px solid #8257e5;
+    }
     .fswp-config-section{
         border:1px solid #2d3a5e;border-radius:8px;margin-bottom:12px;
         overflow:hidden;background:#0d0d14;
@@ -721,13 +733,17 @@ A sua participação é fundamental;"></textarea>
                 if(q.type==='page_break'){
                     const div=document.createElement('div');
                     div.className='fswp-pb-divider';
-                    div.innerHTML=`<span>≡ Quebra de Página — início da página ${++pageNum}</span><button class="fswp-btn-rm-pb" data-qi="${qi}" title="Remover quebra">✕</button>`;
+                    div.setAttribute('draggable','true');
+                    div.dataset.qi=qi;
+                    div.innerHTML=`<span class="fswp-drag-handle" title="Arraste para reposicionar">⠿</span><span>≡ Quebra de Página — início da página ${++pageNum}</span><button class="fswp-btn-rm-pb" data-qi="${qi}" title="Remover quebra">✕</button>`;
                     c.appendChild(div);
                     return;
                 }
                 qNum++;
                 const card=document.createElement('div');
                 card.className='fswp-q-card';
+                card.setAttribute('draggable','true');
+                card.dataset.qi=qi;
 
                 const optsHtml = q.type==='multiple'
                     ? `<div class="fswp-opts">
@@ -743,6 +759,7 @@ A sua participação é fundamental;"></textarea>
 
                 card.innerHTML=`
                     <div class="fswp-q-header">
+                        <span class="fswp-drag-handle" title="Arraste para reposicionar">⠿</span>
                         <span class="fswp-q-num">${qNum}</span>
                         <select class="fswp-q-type" data-qi="${qi}">
                             <option value="multiple"${q.type==='multiple'?' selected':''}>Múltipla Escolha</option>
@@ -757,6 +774,38 @@ A sua participação é fundamental;"></textarea>
                 c.appendChild(card);
             });
 
+            // ── Drag & Drop ──────────────────────────────────────────────
+            let dragSrcIdx = null;
+            c.querySelectorAll('[draggable]').forEach(el=>{
+                el.addEventListener('dragstart',function(e){
+                    dragSrcIdx = +this.dataset.qi;
+                    this.classList.add('dragging');
+                    e.dataTransfer.effectAllowed='move';
+                });
+                el.addEventListener('dragend',function(){
+                    this.classList.remove('dragging');
+                    c.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));
+                });
+                el.addEventListener('dragover',function(e){
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect='move';
+                    c.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));
+                    this.classList.add('drag-over');
+                });
+                el.addEventListener('drop',function(e){
+                    e.preventDefault();
+                    const targetIdx = +this.dataset.qi;
+                    if(dragSrcIdx === null || dragSrcIdx === targetIdx) return;
+                    // Reorder
+                    const moved = questions.splice(dragSrcIdx,1)[0];
+                    const insertAt = dragSrcIdx < targetIdx ? targetIdx - 1 : targetIdx;
+                    questions.splice(insertAt,0,moved);
+                    dragSrcIdx = null;
+                    renderQuestions();
+                });
+            });
+
+            // ── Outros eventos ───────────────────────────────────────────
             c.querySelectorAll('.fswp-btn-rm-pb').forEach(el=>el.addEventListener('click',function(){ questions.splice(+this.dataset.qi,1); renderQuestions(); }));
             c.querySelectorAll('.fswp-q-label').forEach(el=>el.addEventListener('input',function(){ questions[+this.dataset.qi].label=this.value; }));
             c.querySelectorAll('.fswp-q-type').forEach(el=>el.addEventListener('change',function(){
