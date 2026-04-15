@@ -66,6 +66,19 @@
     margin: 0;
     line-height: 1.3;
 }
+.survey-intro-title.survey-intro-title--small {
+    font-size: 16px !important;
+}
+.survey-intro-header.survey-intro-header--small {
+    padding: 18px 36px;
+}
+.survey-intro-header.survey-intro-header--small .survey-intro-logos {
+    margin-bottom: 12px;
+}
+.survey-intro-header.survey-intro-header--small .survey-intro-logo {
+    height: 50px !important;
+    width: 140px !important;
+}
 
 /* Corpo branco */
 .survey-intro-body {
@@ -190,30 +203,60 @@
     display: none; /* Clean mode — sem branding no topo */
 }
 
-/* ── Progress bar ────────────────────────────────── */
-.survey-progress {
+/* ── Stepper Pagination ──────────────────────────── */
+.survey-stepper {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 28px;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 40px;
+    padding: 10px 0;
 }
-.survey-progress-bar {
-    flex: 1;
-    height: 4px;
-    background: #e0e0e0;
-    border-radius: 99px;
-    overflow: hidden;
+.step-wrapper {
+    display: flex;
+    align-items: center;
 }
-.survey-progress-fill {
-    height: 100%;
-    background: #0a57be;
-    border-radius: 99px;
-    transition: width 0.4s ease;
+.step-node {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1.5px solid #d1d5db;
+    background: #fff;
+    color: #9ea5b1;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
 }
-.survey-progress-label {
-    font-size: .78rem;
-    color: #888;
-    white-space: nowrap;
+.step-node.step-active {
+    border-color: #0a57be;
+    color: #0a57be;
+    background: #f0f7ff;
+}
+.step-node.step-completed {
+    border-color: #04d361;
+    color: #04d361;
+    background: #f0fff4;
+}
+.step-line {
+    width: 60px;
+    height: 1.5px;
+    background: #d1d5db;
+    margin: 0 4px;
+}
+.step-line.line-completed {
+    background: #04d361;
+}
+
+@media (max-width: 600px) {
+    .step-line { width: 30px; }
+    .survey-intro-header.survey-intro-header--small .survey-intro-logos {
+        flex-direction: row !important;
+        margin-bottom: 10px;
+    }
 }
 
 /* ── Question block ──────────────────────────────── */

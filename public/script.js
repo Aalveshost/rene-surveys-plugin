@@ -33,11 +33,42 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ── Página de Apresentação ─────────────────────────────────────────
-    function renderIntroPage() {
+    function getHeaderHtml(isSmall) {
         const logoRightClass = config.logo_right_cover ? 'survey-intro-logo survey-intro-logo--cover' : 'survey-intro-logo';
         const logoLeft  = config.logo_left  ? `<div class="survey-intro-logo-col"><img src="${escHtml(config.logo_left)}" alt="Logo" class="survey-intro-logo"></div>` : `<div class="survey-intro-logo-col"></div>`;
         const logoRight = config.logo_right ? `<div class="survey-intro-logo-col right"><img src="${escHtml(config.logo_right)}" alt="Logo cliente" class="${logoRightClass}"></div>` : `<div class="survey-intro-logo-col right"></div>`;
+        const titleSizeClass = isSmall ? 'survey-intro-title--small' : '';
+        const headerClass = isSmall ? 'survey-intro-header survey-intro-header--small' : 'survey-intro-header';
 
+        return `
+            <div class="${headerClass}">
+                <div class="survey-intro-logos">
+                    ${logoLeft}
+                    ${logoRight}
+                </div>
+                ${config.title ? `<h1 class="survey-intro-title ${titleSizeClass}">${parseMarkdown(config.title)}</h1>` : ''}
+            </div>`;
+    }
+
+    function getStepperHtml(pi, total) {
+        if (total <= 1) return '';
+        let steps = '';
+        for (let i = 0; i < total; i++) {
+            const isCurrent  = i === pi;
+            const isFinished = i < pi;
+            const stateClass = isCurrent ? 'step-active' : (isFinished ? 'step-completed' : 'step-upcoming');
+            
+            steps += `
+                <div class="step-wrapper">
+                    <div class="step-node ${stateClass}">${i + 1}</div>
+                    ${i < total - 1 ? `<div class="step-line ${isFinished ? 'line-completed' : ''}"></div>` : ''}
+                </div>`;
+        }
+        return `<div class="survey-stepper">${steps}</div>`;
+    }
+
+    // ── Página de Apresentação ─────────────────────────────────────────
+    function renderIntroPage() {
         let instHtml = '';
         if (config.instructions && config.instructions.length) {
             instHtml = `<div class="survey-intro-instructions">
@@ -48,13 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         appDiv.innerHTML = `
         <div class="survey-intro">
-            <div class="survey-intro-header">
-                <div class="survey-intro-logos">
-                    ${logoLeft}
-                    ${logoRight}
-                </div>
-                ${config.title ? `<h1 class="survey-intro-title">${parseMarkdown(config.title)}</h1>` : ''}
-            </div>
+            ${getHeaderHtml(false)}
             <div class="survey-intro-body">
                 ${config.subtitle    ? `<h2 class="survey-intro-subtitle">${parseMarkdown(config.subtitle)}</h2>` : ''}
                 ${config.description ? `<div class="survey-intro-desc">${escHtmlWithLineBreaks(config.description)}</div>` : ''}
@@ -104,19 +129,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const isLast  = pi === pages.length - 1;
         const total   = pages.length;
 
-        let html = `<form id="rene-survey-form" class="survey-form-premium">`;
-
-        // Indicador de progresso (só se multi-página)
-        if (total > 1) {
-            const pct = Math.round((pi / (total - 1)) * 100);
-            html += `
-            <div class="survey-progress">
-                <div class="survey-progress-bar">
-                    <div class="survey-progress-fill" style="width:${pct}%"></div>
-                </div>
-                <span class="survey-progress-label">Página ${pi + 1} de ${total}</span>
-            </div>`;
-        }
+        let html = `
+        <div class="survey-intro survey-page-container">
+            ${getHeaderHtml(true)}
+            <div class="survey-intro-body">
+                ${getStepperHtml(pi, total)}
+                <form id="rene-survey-form" class="survey-form-premium">`;
 
         // Questões
         let qNum = 0;
