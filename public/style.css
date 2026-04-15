@@ -1,264 +1,198 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-:root {
-    --rs-bg-color: #121214;
-    --rs-panel-bg: #1a1a1e;
-    --rs-border-color: #323238;
-    --rs-text-primary: #e1e1e6;
-    --rs-text-secondary: #a9a9b2;
-    --rs-accent: #8257e5;
-    --rs-accent-hover: #996dff;
-    --rs-success: #04d361;
-    --rs-error: #f75a68;
-    --rs-border-radius: 8px;
-    --rs-transition: all 0.2s ease;
-}
-
-/* ── Branding ─────────────────────────────────────── */
-.safesurvey-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--rs-border-color);
-}
-.safesurvey-brand-icon { font-size: 1.5rem; line-height: 1; }
-.safesurvey-brand-name {
-    font-size: 1.1rem;
-    color: var(--rs-text-secondary);
-    letter-spacing: 0.03em;
-    font-weight: 400;
-}
-.safesurvey-brand-name strong {
-    color: var(--rs-accent);
-    font-weight: 700;
-}
-
-/* ── Container ───────────────────────────────────── */
+/* ── Reset / Container ───────────────────────────── */
 .rene-survey-container {
-    font-family: 'Inter', 'Roboto', sans-serif;
-    background-color: var(--rs-bg-color);
-    color: var(--rs-text-primary);
-    padding: 40px 20px;
-    min-height: 100%;
+    font-family: 'Inter', 'Tahoma', sans-serif;
+    background: transparent;
+    color: #333333;
+    padding: 20px 0;
 }
 
 .survey-form-premium {
-    max-width: 800px;
+    max-width: 860px;
     margin: 0 auto;
-    background: var(--rs-panel-bg);
-    padding: 40px;
-    border-radius: var(--rs-border-radius);
-    border: 1px solid var(--rs-border-color);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    background: transparent;
+    padding: 0;
+}
+
+/* ── Branding (pequeno, discreto) ────────────────── */
+.safesurvey-brand {
+    display: none; /* Clean mode — sem branding no topo */
 }
 
 /* ── Progress bar ────────────────────────────────── */
 .survey-progress {
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 36px;
+    gap: 12px;
+    margin-bottom: 28px;
 }
 .survey-progress-bar {
     flex: 1;
-    height: 6px;
-    background: var(--rs-border-color);
+    height: 4px;
+    background: #e0e0e0;
     border-radius: 99px;
     overflow: hidden;
 }
 .survey-progress-fill {
     height: 100%;
-    background: var(--rs-accent);
+    background: #0a57be;
     border-radius: 99px;
     transition: width 0.4s ease;
 }
 .survey-progress-label {
     font-size: .78rem;
-    color: var(--rs-text-secondary);
+    color: #888;
     white-space: nowrap;
 }
 
 /* ── Question block ──────────────────────────────── */
 .question-block {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--rs-border-color);
-    transition: var(--rs-transition);
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ececec;
 }
 .question-block:last-of-type {
     border-bottom: none;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
 }
 
 /* Error state */
+.question-block.question-error .question-label {
+    color: #c0392b;
+}
 .question-block.question-error {
-    padding: 16px;
-    border: 1px solid var(--rs-error);
-    border-radius: var(--rs-border-radius);
-    background: rgba(247, 90, 104, 0.04);
     animation: rs-shake .3s ease;
-    margin-bottom: 16px;
 }
 @keyframes rs-shake {
     0%,100%{transform:translateX(0)}
-    25%{transform:translateX(-6px)}
-    75%{transform:translateX(6px)}
+    25%{transform:translateX(-5px)}
+    75%{transform:translateX(5px)}
 }
 
 .question-label {
     display: block;
-    font-size: 1.05rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--rs-text-primary);
+    font-size: 1rem;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 12px;
     line-height: 1.5;
 }
 .question-label span {
-    color: var(--rs-accent);
-    margin-right: 6px;
+    /* número incluído no texto — nada especial */
 }
 
-/* ── Radio options — clique na linha inteira ─────── */
+/* ── Radio options ───────────────────────────────── */
 .options-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0;
 }
 
 .radio-option {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 16px;
-    border: 1px solid var(--rs-border-color);
-    border-radius: var(--rs-border-radius);
+    gap: 10px;
+    padding: 7px 4px;
     cursor: pointer;
-    transition: var(--rs-transition);
     user-select: none;
+    border-radius: 4px;
+    transition: background .12s ease;
 }
 .radio-option:hover {
-    border-color: var(--rs-accent);
-    background: rgba(130, 87, 229, 0.06);
+    background: #f5f7fa;
 }
 
-/* Esconde o input nativo */
+/* Input nativo — mantemos mas estilizamos levemente */
 .radio-option input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-/* Custom radio circle */
-.radio-custom {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 2px solid var(--rs-text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 17px;
+    height: 17px;
+    accent-color: #0a57be;
+    cursor: pointer;
     flex-shrink: 0;
-    transition: var(--rs-transition);
-    position: relative;
-}
-.radio-custom::after {
-    content: '';
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--rs-accent);
-    transform: scale(0);
-    transition: transform 0.15s ease;
+    margin: 0;
 }
 
-.radio-option input[type="radio"]:checked ~ .radio-custom {
-    border-color: var(--rs-accent);
-}
-.radio-option input[type="radio"]:checked ~ .radio-custom::after {
-    transform: scale(1);
-}
-.radio-option:has(input:checked) {
-    border-color: var(--rs-accent);
-    background: rgba(130, 87, 229, 0.08);
-}
+/* Esconde o custom circle — usamos nativo aqui */
+.radio-custom { display: none; }
 
 .radio-label-text {
-    font-size: 1rem;
-    color: var(--rs-text-secondary);
-    transition: color .15s;
+    font-size: .97rem;
+    color: #333333;
+    line-height: 1.4;
 }
 .radio-option:has(input:checked) .radio-label-text {
-    color: var(--rs-text-primary);
     font-weight: 500;
+    color: #0a57be;
+}
+.radio-option:has(input:checked) {
+    background: #f0f5ff;
 }
 
 /* ── Textarea ─────────────────────────────────────── */
 .text-input-premium {
     width: 100%;
     box-sizing: border-box;
-    background: #121214;
-    border: 1px solid var(--rs-border-color);
-    border-radius: var(--rs-border-radius);
-    padding: 16px;
-    color: var(--rs-text-primary);
-    font-size: 1rem;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px 12px;
+    color: #333;
+    font-size: .97rem;
     font-family: inherit;
-    transition: var(--rs-transition);
+    transition: border-color .15s;
     resize: vertical;
 }
 .text-input-premium:focus {
     outline: none;
-    border-color: var(--rs-accent);
-    box-shadow: 0 0 0 2px rgba(130, 87, 229, 0.2);
+    border-color: #0a57be;
+    box-shadow: 0 0 0 2px rgba(10,87,190,.1);
 }
-.text-input-premium::placeholder { color: #5c5c66; }
+.text-input-premium::placeholder { color: #aaa; }
 
 /* ── Navigation ──────────────────────────────────── */
 .form-navigation {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
+    gap: 10px;
     margin-top: 8px;
-    padding-top: 24px;
-    border-top: 1px solid var(--rs-border-color);
+    padding-top: 20px;
+    border-top: 1px solid #ececec;
 }
 
 .btn-nav {
-    background: transparent;
-    border: 1px solid var(--rs-border-color);
-    color: var(--rs-text-secondary);
-    padding: 11px 22px;
-    font-size: .95rem;
+    background: #fff;
+    border: 1px solid #ccc;
+    color: #555;
+    padding: 9px 22px;
+    font-size: .92rem;
     font-weight: 500;
-    border-radius: var(--rs-border-radius);
+    border-radius: 4px;
     cursor: pointer;
     font-family: inherit;
-    transition: var(--rs-transition);
+    transition: border-color .15s, color .15s, background .15s;
 }
 .btn-nav:hover {
-    border-color: var(--rs-accent);
-    color: var(--rs-text-primary);
+    border-color: #999;
+    color: #333;
+    background: #f5f5f5;
 }
 
 .btn-premium {
-    background: var(--rs-accent);
+    background: #0a57be;
     color: #fff;
     border: none;
-    padding: 12px 28px;
-    font-size: .95rem;
+    padding: 10px 28px;
+    font-size: .92rem;
     font-weight: 600;
-    border-radius: var(--rs-border-radius);
+    border-radius: 4px;
     cursor: pointer;
     font-family: inherit;
-    transition: var(--rs-transition);
+    transition: background .15s;
 }
 .btn-premium:hover:not(:disabled) {
-    background: var(--rs-accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(130, 87, 229, 0.3);
+    background: #0847a0;
 }
 .btn-premium:disabled {
     opacity: 0.7;
@@ -267,62 +201,57 @@
 
 /* ── Messages ─────────────────────────────────────── */
 .survey-message {
-    margin-top: 20px;
-    padding: 14px 16px;
-    border-radius: var(--rs-border-radius);
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     font-weight: 500;
-    font-size: .95rem;
+    font-size: .92rem;
 }
 .survey-message.hidden { display: none; }
 .survey-message.success {
-    background: rgba(4,211,97,0.1);
-    color: var(--rs-success);
-    border: 1px solid rgba(4,211,97,0.2);
+    background: #edfbf3;
+    color: #1a9e50;
+    border: 1px solid #b7e9cb;
 }
 .survey-message.error {
-    background: rgba(247,90,104,0.1);
-    color: var(--rs-error);
-    border: 1px solid rgba(247,90,104,0.2);
+    background: #fff5f5;
+    color: #c0392b;
+    border: 1px solid #f5c6c6;
 }
 
-/* ── Not found ───────────────────────────────────── */
-.rene-survey-not-found {
-    padding: 32px;
-    text-align: center;
-    color: var(--rs-text-secondary);
-    font-family: 'Inter', sans-serif;
-}
+/* ── Not found / empty ───────────────────────────── */
+.rene-survey-not-found,
 .empty-msg, .error {
-    text-align: center;
-    padding: 32px;
-    color: var(--rs-text-secondary);
-    font-family: 'Inter', sans-serif;
+    padding: 24px 0;
+    color: #888;
+    font-family: inherit;
+    font-size: .95rem;
 }
 
 /* ── Success screen ───────────────────────────────── */
 .survey-success-screen {
-    max-width: 800px;
-    margin: 0 auto;
-    background: var(--rs-panel-bg);
-    border: 1px solid var(--rs-border-color);
-    border-radius: var(--rs-border-radius);
+    max-width: 640px;
+    margin: 20px auto;
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
     padding: 60px 40px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    animation: rs-fadein .5s ease;
+    box-shadow: 0 2px 16px rgba(0,0,0,.06);
+    animation: rs-fadein .45s ease;
 }
 @keyframes rs-fadein {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 .survey-success-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 28px;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 24px;
 }
 .survey-success-icon svg {
     width: 100%;
@@ -330,64 +259,60 @@
     overflow: visible;
 }
 
-/* Animação do círculo */
 .success-circle {
+    stroke: #0a57be;
     stroke-dasharray: 157;
     stroke-dashoffset: 157;
-    animation: draw-circle .6s ease forwards;
+    animation: draw-circle .55s ease forwards;
 }
-@keyframes draw-circle {
-    to { stroke-dashoffset: 0; }
-}
+@keyframes draw-circle { to { stroke-dashoffset: 0; } }
 
-/* Animação do check */
 .success-check {
+    stroke: #0a57be;
     stroke-dasharray: 36;
     stroke-dashoffset: 36;
-    animation: draw-check .4s .55s ease forwards;
+    animation: draw-check .35s .5s ease forwards;
 }
-@keyframes draw-check {
-    to { stroke-dashoffset: 0; }
-}
+@keyframes draw-check { to { stroke-dashoffset: 0; } }
 
 .survey-success-title {
-    font-size: 1.6rem;
+    font-size: 1.45rem;
     font-weight: 700;
-    color: var(--rs-text-primary);
-    margin: 0 0 14px;
+    color: #222;
+    margin: 0 0 12px;
 }
 
 .survey-success-sub {
-    font-size: 1rem;
-    color: var(--rs-text-secondary);
+    font-size: .97rem;
+    color: #666;
     line-height: 1.65;
-    max-width: 480px;
-    margin: 0 auto 28px;
+    max-width: 440px;
+    margin: 0 auto 24px;
 }
 
 .survey-success-badge {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: rgba(4, 211, 97, 0.08);
-    border: 1px solid rgba(4, 211, 97, 0.2);
-    color: var(--rs-success);
-    font-size: .82rem;
+    background: #f0f5ff;
+    border: 1px solid #c8d9f5;
+    color: #0a57be;
+    font-size: .8rem;
     font-weight: 500;
-    padding: 7px 14px;
+    padding: 6px 14px;
     border-radius: 99px;
 }
 
 /* ── Button spinner ───────────────────────────────── */
 .btn-spinner {
     display: inline-block;
-    width: 14px;
-    height: 14px;
-    border: 2px solid rgba(255,255,255,.35);
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(255,255,255,.4);
     border-top-color: #fff;
     border-radius: 50%;
     animation: rs-spin .7s linear infinite;
     vertical-align: middle;
-    margin-right: 2px;
+    margin-right: 4px;
 }
 @keyframes rs-spin { to { transform: rotate(360deg); } }
