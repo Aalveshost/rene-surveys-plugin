@@ -34,8 +34,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Página de Apresentação ─────────────────────────────────────────
     function renderIntroPage() {
+        const logoRightClass = config.logo_right_cover ? 'survey-intro-logo survey-intro-logo--cover' : 'survey-intro-logo';
         const logoLeft  = config.logo_left  ? `<div class="survey-intro-logo-col"><img src="${escHtml(config.logo_left)}" alt="Logo" class="survey-intro-logo"></div>` : `<div class="survey-intro-logo-col"></div>`;
-        const logoRight = config.logo_right ? `<div class="survey-intro-logo-col right"><img src="${escHtml(config.logo_right)}" alt="Logo cliente" class="survey-intro-logo"></div>` : `<div class="survey-intro-logo-col right"></div>`;
+        const logoRight = config.logo_right ? `<div class="survey-intro-logo-col right"><img src="${escHtml(config.logo_right)}" alt="Logo cliente" class="${logoRightClass}"></div>` : `<div class="survey-intro-logo-col right"></div>`;
 
         let instHtml = '';
         if (config.instructions && config.instructions.length) {

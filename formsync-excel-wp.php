@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.21
+ * Version: 1.0.22
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -423,7 +423,12 @@ function formsync_render_frontend_builder() {
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Logo Direita (URL logo do cliente)</label>
-                            <input type="text" id="cfg-logo-right" placeholder="https://...cliente-logo.png">
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" id="cfg-logo-right" placeholder="https://...cliente-logo.png" style="flex:1;">
+                                <label style="display:flex;align-items:center;gap:6px;margin:0;color:#e1e1e6;cursor:pointer;white-space:nowrap;" title="Use para dar zoom automático em logos mal recortadas (com muito fundo transparente)">
+                                    <input type="checkbox" id="cfg-logo-right-cover" style="width:auto;margin:0;"> Expandir
+                                </label>
+                            </div>
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Título principal (H1 branco no topo azul)</label>
@@ -708,6 +713,7 @@ A sua participação é fundamental;"></textarea>
             let cfg={}; try{ cfg=JSON.parse(cfgJson||'{}'); }catch{}
             $i('cfg-logo-left').value  = cfg.logo_left    || '';
             $i('cfg-logo-right').value = cfg.logo_right   || '';
+            $i('cfg-logo-right-cover').checked = cfg.logo_right_cover || false;
             $i('cfg-title').value      = cfg.title        || '';
             $i('cfg-subtitle').value   = cfg.subtitle     || '';
             $i('cfg-description').value= cfg.description  || '';
@@ -840,9 +846,10 @@ A sua participação é fundamental;"></textarea>
             // Lê campos de config
             const instrRaw = $i('cfg-instructions').value;
             const config = {
-                logo_left    : $i('cfg-logo-left').value.trim(),
-                logo_right   : $i('cfg-logo-right').value.trim(),
-                title        : $i('cfg-title').value.trim(),
+                logo_left       : $i('cfg-logo-left').value.trim(),
+                logo_right      : $i('cfg-logo-right').value.trim(),
+                logo_right_cover: $i('cfg-logo-right-cover').checked,
+                title           : $i('cfg-title').value.trim(),
                 subtitle     : $i('cfg-subtitle').value.trim(),
                 description  : $i('cfg-description').value.trim(),
                 instructions : instrRaw.split('\n').map(l=>l.trim()).filter(l=>l),

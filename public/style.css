@@ -53,6 +53,9 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
     box-sizing: border-box !important;
 }
+.survey-intro-logo.survey-intro-logo--cover {
+    object-fit: cover !important;
+}
 
 /* H1 no header */
 .survey-intro-title {
