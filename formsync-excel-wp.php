@@ -728,6 +728,17 @@ A sua participação é fundamental;" style="max-height:160px;"></textarea>
             showView('editor');
         }
 
+        // Limpa paste do Word/Doc na textarea de descrição
+        $i('cfg-description').addEventListener('paste', function(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            const clean = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            const start = this.selectionStart;
+            const end   = this.selectionEnd;
+            this.value = this.value.slice(0, start) + clean + this.value.slice(end);
+            this.selectionStart = this.selectionEnd = start + clean.length;
+        });
+
         $i('fswp-btn-add-q').addEventListener('click',()=>{
             questions.push({id:'q_'+Date.now(),label:'',type:'multiple',options:['','','','','']});
             renderQuestions();
