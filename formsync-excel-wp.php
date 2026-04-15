@@ -440,7 +440,7 @@ function formsync_render_frontend_builder() {
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Descrição</label>
-                            <textarea id="cfg-description" rows="5" placeholder="Texto introdutório da pesquisa..." style="font-family:monospace;resize:vertical;line-height:1.5;max-height:200px;"></textarea>
+                            <textarea id="cfg-description" rows="8" placeholder="Texto introdutório da pesquisa..." style="font-family:monospace;resize:vertical;line-height:1.5;"></textarea>
                             <p style="font-size:.85rem;color:#a9a9b2;margin:4px 0 0 0;">💡 Pressione Enter para quebras de linha.</p>
                         </div>
                         <div class="fswp-cfg-row">
@@ -633,7 +633,7 @@ A sua participação é fundamental;" style="max-height:160px;"></textarea>
     .fswp-config-summary::-webkit-details-marker{display:none;}
     .fswp-config-summary::before{content:'▶';font-size:.65rem;transition:transform .2s;}
     details[open] .fswp-config-summary::before{transform:rotate(90deg);}
-    .fswp-config-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;border-top:1px solid #1e2a45;}
+    .fswp-config-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;border-top:1px solid #1e2a45;max-height:400px;overflow-y:auto;}
     .fswp-cfg-row label{display:block;color:#7a88a8;font-size:.75rem;margin-bottom:4px;}
     .fswp-cfg-row input,.fswp-cfg-row textarea{
         width:100%;box-sizing:border-box;
@@ -852,7 +852,7 @@ A sua participação é fundamental;" style="max-height:160px;"></textarea>
                 logo_right_cover: $i('cfg-logo-right-cover').checked,
                 title           : $i('cfg-title').value.trim(),
                 subtitle     : $i('cfg-subtitle').value.trim(),
-                description  : $i('cfg-description').value.trim(),
+                description  : $i('cfg-description').value,
                 instructions : instrRaw.split('\n').map(l=>l.trim()).filter(l=>l),
                 period       : $i('cfg-period').value.trim(),
             };
