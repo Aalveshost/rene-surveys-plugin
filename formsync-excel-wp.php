@@ -440,7 +440,8 @@ function formsync_render_frontend_builder() {
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Descrição</label>
-                            <textarea id="cfg-description" rows="6" placeholder="Texto introdutório da pesquisa..."></textarea>
+                            <textarea id="cfg-description" rows="10" placeholder="Texto introdutório da pesquisa..." style="font-family:monospace;resize:vertical;line-height:1.5;"></textarea>
+                            <p style="font-size:.85rem;color:#a9a9b2;margin:4px 0 0 0;">💡 Pressione Enter para quebras de linha.</p>
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Instruções Importantes (uma por linha)</label>

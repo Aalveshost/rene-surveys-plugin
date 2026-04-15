@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
             <div class="survey-intro-body">
                 ${config.subtitle    ? `<h2 class="survey-intro-subtitle">${escHtml(config.subtitle)}</h2>` : ''}
-                ${config.description ? `<p class="survey-intro-desc">${escHtml(config.description)}</p>` : ''}
+                ${config.description ? `<div class="survey-intro-desc">${escHtml(config.description)}</div>` : ''}
                 ${instHtml}
                 ${config.period      ? `<p class="survey-intro-period">Período de aplicação da pesquisa: ${escHtml(config.period)}</p>` : ''}
                 <div class="survey-intro-footer">
