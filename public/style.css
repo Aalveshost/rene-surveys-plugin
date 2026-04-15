@@ -92,6 +92,10 @@
     color: #0A57BE;
     margin: 8px 0 4px;
 }
+.survey-text-blue {
+    color: #0A57BE;
+    font-weight: inherit;
+}
 
 /* Descrição */
 .survey-intro-desc {

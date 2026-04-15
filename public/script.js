@@ -53,13 +53,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     ${logoLeft}
                     ${logoRight}
                 </div>
-                ${config.title ? `<h1 class="survey-intro-title">${escHtml(config.title)}</h1>` : ''}
+                ${config.title ? `<h1 class="survey-intro-title">${parseMarkdown(config.title)}</h1>` : ''}
             </div>
             <div class="survey-intro-body">
-                ${config.subtitle    ? `<h2 class="survey-intro-subtitle">${escHtml(config.subtitle)}</h2>` : ''}
+                ${config.subtitle    ? `<h2 class="survey-intro-subtitle">${parseMarkdown(config.subtitle)}</h2>` : ''}
                 ${config.description ? `<div class="survey-intro-desc">${escHtmlWithLineBreaks(config.description)}</div>` : ''}
                 ${instHtml}
-                ${config.period      ? `<p class="survey-intro-period">Período de aplicação da pesquisa: ${escHtml(config.period)}</p>` : ''}
+                ${config.period      ? `<p class="survey-intro-period">Período de aplicação da pesquisa: ${parseMarkdown(config.period)}</p>` : ''}
                 <div class="survey-intro-footer">
                     <button class="btn-premium" id="fswp-btn-seguinte">Seguinte</button>
                 </div>
@@ -115,14 +115,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Questões
-        qs.forEach(q => {
-            if (q.type === 'section_title') {
-                html += `<div class="survey-section-title">${escHtml(q.label)}</div>`;
-                return;
+        qs.forEach((q, qi) => {
+            const isSection = q.type === 'section_title';
+            const label = parseMarkdown(q.label || '');
+            html += `<div class="question-block ${isSection ? 'section-block' : ''}" data-qid="${q.id}">`;
+            
+            if (isSection) {
+                html += `<h2 class="section-label">${label}</h2>`;
+            } else {
+                qNum++;
+                html += `<label class="question-label"><span>${qNum}.</span> ${label}</label>`;
             }
-            const num = realQuestions.indexOf(q) + 1;
-            html += `<div class="question-block" data-qid="${q.id}">`;
-            html += `<p class="question-label"><span>${num}.</span> ${q.label}</p>`;
 
             if (q.type === 'multiple') {
                 html += `<div class="options-group">`;
@@ -296,12 +299,17 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    function parseMarkdown(s) {
+        if (!s) return '';
+        return escHtml(s)
+            .replace(/\*\*\*\*\*\*(.+?)\*\*\*\*\*\*/g, '<span class="survey-text-blue">$1</span>')
+            .replace(/\*\*\*(.+?)\*\*\*/g, '<strong>$1</strong>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
     function escHtmlWithLineBreaks(s) {
-        return String(s).replace(/\\n/g, '\n').split('\n').map(line => {
-            return escHtml(line)
-                .replace(/\*\*\*(.+?)\*\*\*/g, '<span class="survey-desc-h2">$1</span>')
-                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        }).join('<br>');
+        if (!s) return '';
+        return String(s).replace(/\\n/g, '\n').split('\n').map(line => parseMarkdown(line)).join('<br>');
     }
 
     if (!onIntro && pages.length) {
