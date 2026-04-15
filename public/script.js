@@ -277,6 +277,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function validatePage(qs, form) {
         let valid = true;
         qs.forEach(q => {
+            if (q.type !== 'multiple' && q.type !== 'text') return;
+
             const block = form.querySelector(`[data-qid="${q.id}"]`);
             let answered = false;
             if (q.type === 'multiple') {
