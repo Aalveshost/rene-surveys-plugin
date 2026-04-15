@@ -21,11 +21,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const hasIntro = !!(config.title || config.subtitle || config.description);
     let onIntro = hasIntro;
 
-    if (!allQuestions.length) {
-        appDiv.innerHTML = '<p class="empty-msg">Nenhuma pergunta encontrada para este questionário.</p>';
-        return;
-    }
-
     // ── Divide em páginas pelo marcador page_break ─────────────────────
     const pages = [];
     let buf = [];
