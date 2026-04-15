@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.27
+ * Version: 1.0.28
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -21,7 +21,7 @@ add_action('elementor/widgets/register', function($widgets_manager) {
     $widgets_manager->register(new FormSync_Elementor_Widget());
 });
 
-define('FSWP_VER', '1.0.27');
+define('FSWP_VER', '1.0.28');
 
 // 1. Enfileirar Scripts e Estilos para o Front-end
 add_action('wp_enqueue_scripts', 'rene_surveys_enqueue_scripts');
@@ -639,7 +639,7 @@ A sua participação é fundamental;" style="max-height:160px;"></textarea>
     .fswp-config-summary::-webkit-details-marker{display:none;}
     .fswp-config-summary::before{content:'▶';font-size:.65rem;transition:transform .2s;}
     details[open] .fswp-config-summary::before{transform:rotate(90deg);}
-    .fswp-config-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;border-top:1px solid #1e2a45;max-height:400px;overflow-y:auto;}
+    .fswp-config-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;border-top:1px solid #1e2a45;}
     .fswp-cfg-row label{display:block;color:#7a88a8;font-size:.75rem;margin-bottom:4px;}
     .fswp-cfg-row input,.fswp-cfg-row textarea{
         width:100%;box-sizing:border-box;
