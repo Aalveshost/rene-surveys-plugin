@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.25
+ * Version: 1.0.26
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -21,7 +21,7 @@ add_action('elementor/widgets/register', function($widgets_manager) {
     $widgets_manager->register(new FormSync_Elementor_Widget());
 });
 
-define('FSWP_VER', '1.0.25');
+define('FSWP_VER', '1.0.26');
 
 // 1. Enfileirar Scripts e Estilos para o Front-end
 add_action('wp_enqueue_scripts', 'rene_surveys_enqueue_scripts');
@@ -723,7 +723,7 @@ A sua participação é fundamental;" style="max-height:160px;"></textarea>
             $i('cfg-logo-right-cover').checked = cfg.logo_right_cover || false;
             $i('cfg-title').value      = cfg.title        || '';
             $i('cfg-subtitle').value   = cfg.subtitle     || '';
-            $i('cfg-description').value= cfg.description  || '';
+            $i('cfg-description').value= (cfg.description || '').replace(/\\n/g, '\n');
             $i('cfg-instructions').value = (cfg.instructions||[]).join('\n');
             $i('cfg-period').value     = cfg.period       || '';
             renderQuestions();
@@ -869,7 +869,7 @@ A sua participação é fundamental;" style="max-height:160px;"></textarea>
                 logo_right_cover: $i('cfg-logo-right-cover').checked,
                 title           : $i('cfg-title').value.trim(),
                 subtitle     : $i('cfg-subtitle').value.trim(),
-                description  : $i('cfg-description').value,
+                description  : $i('cfg-description').value.replace(/\n/g, '\\n'),
                 instructions : instrRaw.split('\n').map(l=>l.trim()).filter(l=>l),
                 period       : $i('cfg-period').value.trim(),
             };
