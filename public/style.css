@@ -82,6 +82,16 @@
     margin: 0 0 14px;
 }
 
+/* Markdown inline na descrição */
+.survey-desc-h2 {
+    display: block;
+    font-family: "Tahoma", sans-serif;
+    font-size: 21px;
+    font-weight: 600;
+    color: #0A57BE;
+    margin: 8px 0 4px;
+}
+
 /* Descrição */
 .survey-intro-desc {
     color: #444;

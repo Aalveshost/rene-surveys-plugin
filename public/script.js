@@ -294,7 +294,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function escHtmlWithLineBreaks(s) {
         return String(s).replace(/\\n/g, '\n').split('\n').map(line => {
-            return escHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            return escHtml(line)
+                .replace(/\*\*\*(.+?)\*\*\*/g, '<span class="survey-desc-h2">$1</span>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
         }).join('<br>');
     }
 
