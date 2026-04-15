@@ -141,6 +141,19 @@
     border-top: 1px solid #eee;
 }
 
+/* Título de Seção entre questões */
+.survey-section-title {
+    font-family: "Tahoma", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #333;
+    margin: 24px 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #0a57be;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
 /* Footer com botão Seguinte */
 .survey-intro-footer {
     display: flex;

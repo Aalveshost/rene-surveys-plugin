@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.34
+ * Version: 1.0.35
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -21,7 +21,7 @@ add_action('elementor/widgets/register', function($widgets_manager) {
     $widgets_manager->register(new FormSync_Elementor_Widget());
 });
 
-define('FSWP_VER', '1.0.34');
+define('FSWP_VER', '1.0.35');
 
 // 1. Enfileirar Scripts e Estilos para o Front-end
 add_action('wp_enqueue_scripts', 'rene_surveys_enqueue_scripts');
@@ -458,6 +458,7 @@ function formsync_render_frontend_builder() {
                 <div class="fswp-editor-footer">
                     <div style="display:flex;gap:8px;">
                         <button id="fswp-btn-add-q" class="fswp-btn-ghost">+ Questão</button>
+                        <button id="fswp-btn-add-title" class="fswp-btn-ghost" style="color:#8ba0cc;">T + Título</button>
                         <button id="fswp-btn-add-pb" class="fswp-btn-ghost fswp-btn-pb">≡ + Página</button>
                     </div>
                     <button id="fswp-btn-save" class="fswp-btn-primary">💾 Salvar</button>
@@ -596,6 +597,19 @@ function formsync_render_frontend_builder() {
     .fswp-btn-ghost:hover{border-color:#8257e5;color:#e1e1e6;}
     .fswp-btn-pb{border-color:#2d6a4f;color:#52b788;}
     .fswp-btn-pb:hover{border-color:#52b788 !important;color:#74c69d !important;background:rgba(82,183,136,.05);}
+    .fswp-section-title-card{
+        display:flex;align-items:center;gap:10px;
+        margin:6px 0;padding:10px 14px;
+        background:rgba(130,87,229,.06);border:1px dashed #8257e5;
+        border-radius:8px;
+    }
+    .fswp-section-title-input{
+        flex:1;background:transparent;border:none;
+        color:#c8b8ff;font-size:.9rem;font-weight:700;
+        text-transform:uppercase;letter-spacing:.03em;
+        outline:none;
+    }
+    .fswp-section-title-input::placeholder{color:#555;font-weight:400;text-transform:none;}
     .fswp-pb-divider{
         display:flex;align-items:center;gap:10px;
         margin:6px 0;padding:10px 14px;
@@ -737,6 +751,11 @@ function formsync_render_frontend_builder() {
             setTimeout(()=>{ const labels=$i('fswp-q-container').querySelectorAll('.fswp-q-label'); if(labels.length) labels[labels.length-1].focus(); },50);
         });
 
+        $i('fswp-btn-add-title').addEventListener('click',()=>{
+            questions.push({id:'title_'+Date.now(),type:'section_title',label:''});
+            renderQuestions();
+        });
+
         $i('fswp-btn-add-pb').addEventListener('click',()=>{
             questions.push({id:'pb_'+Date.now(),type:'page_break'});
             renderQuestions();
@@ -751,6 +770,15 @@ function formsync_render_frontend_builder() {
             }
             let pageNum=1; let qNum=0;
             questions.forEach((q,qi)=>{
+                if(q.type==='section_title'){
+                    const div=document.createElement('div');
+                    div.className='fswp-section-title-card';
+                    div.setAttribute('draggable','true');
+                    div.dataset.qi=qi;
+                    div.innerHTML=`<span class="fswp-drag-handle" title="Arraste">⠿</span><input type="text" class="fswp-q-label fswp-section-title-input" data-qi="${qi}" value="${esc(q.label)}" placeholder="Título da seção (ex: A. PERCEPÇÃO SOBRE SUA EMPRESA)"><button class="fswp-btn-rm-q" data-qi="${qi}" title="Remover">🗑</button>`;
+                    c.appendChild(div);
+                    return;
+                }
                 if(q.type==='page_break'){
                     const div=document.createElement('div');
                     div.className='fswp-pb-divider';

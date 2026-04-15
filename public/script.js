@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Índice global para numerar as questões correto
-    const realQuestions = allQuestions.filter(q => q.type !== 'page_break');
+    const realQuestions = allQuestions.filter(q => q.type !== 'page_break' && q.type !== 'section_title');
 
     let currentPage = 0;
     const answers   = {};   // { qid: value }
@@ -116,6 +116,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Questões
         qs.forEach(q => {
+            if (q.type === 'section_title') {
+                html += `<div class="survey-section-title">${escHtml(q.label)}</div>`;
+                return;
+            }
             const num = realQuestions.indexOf(q) + 1;
             html += `<div class="question-block" data-qid="${q.id}">`;
             html += `<p class="question-label"><span>${num}.</span> ${q.label}</p>`;
