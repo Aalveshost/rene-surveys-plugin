@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -478,28 +478,31 @@ function formsync_render_frontend_builder() {
         margin-bottom:10px;overflow:hidden;
     }
     .fswp-q-header{
-        display:flex;align-items:center;gap:10px;
-        padding:11px 14px;border-bottom:1px solid #323238;
+        display:flex;align-items:center;gap:8px;
+        padding:10px 14px;border-bottom:1px solid #323238;
     }
     .fswp-q-num{
         width:26px;height:26px;border-radius:50%;
         background:#8257e5;color:#fff;font-size:.78rem;font-weight:700;
         display:flex;align-items:center;justify-content:center;flex-shrink:0;
     }
-    .fswp-q-label{
-        flex:1;background:transparent;border:none;
-        color:#e1e1e6;font-size:.9rem;min-width:0;
-    }
-    .fswp-q-label:focus{outline:none;}
-    .fswp-q-label::placeholder{color:#555;}
     .fswp-q-type{
-        background:#1e1e24;border:1px solid #323238;border-radius:6px;
+        flex:1;background:#1e1e24;border:1px solid #323238;border-radius:6px;
         color:#a9a9b2;font-size:.78rem;padding:4px 8px;cursor:pointer;
     }
     .fswp-btn-rm-q{
         background:transparent;border:none;color:#f75a68;
         cursor:pointer;font-size:.95rem;padding:2px 6px;border-radius:4px;
     }
+    .fswp-q-label-wrap{padding:10px 14px;border-bottom:1px solid #323238;}
+    .fswp-q-label{
+        width:100%;box-sizing:border-box;
+        background:#0e0e11;border:1px solid #323238;border-radius:8px;
+        color:#e1e1e6;font-size:.92rem;padding:10px 14px;
+        transition:border-color .15s;
+    }
+    .fswp-q-label:focus{outline:none;border-color:#8257e5;box-shadow:0 0 0 2px rgba(130,87,229,.15);}
+    .fswp-q-label::placeholder{color:#555;}
     .fswp-q-body{padding:12px 14px;}
     .fswp-opt-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
     .fswp-opt-letter{
@@ -605,8 +608,11 @@ function formsync_render_frontend_builder() {
         }
 
         $i('fswp-btn-add-q').addEventListener('click',()=>{
-            questions.push({id:'q_'+Date.now(),label:'',type:'multiple',options:['']});
+            // Pre-populate A-E (5 empty slots)
+            questions.push({id:'q_'+Date.now(),label:'',type:'multiple',options:['','','','','']});
             renderQuestions();
+            // Focus the new question label
+            setTimeout(()=>{ const labels=$i('fswp-q-container').querySelectorAll('.fswp-q-label'); if(labels.length) labels[labels.length-1].focus(); },50);
         });
 
         function renderQuestions(){
@@ -619,28 +625,32 @@ function formsync_render_frontend_builder() {
             questions.forEach((q,qi)=>{
                 const card=document.createElement('div');
                 card.className='fswp-q-card';
-                const bodyHtml = q.type==='multiple'
+
+                const optsHtml = q.type==='multiple'
                     ? `<div class="fswp-opts">
                         ${(q.options||[]).map((opt,oi)=>`
                             <div class="fswp-opt-row">
                                 <span class="fswp-opt-letter">${LETTERS[oi]||oi+1}</span>
-                                <input class="fswp-opt-input" type="text" data-qi="${qi}" data-oi="${oi}" value="${esc(opt)}" placeholder="Opção ${LETTERS[oi]||oi+1}">
-                                <button class="fswp-btn-rm-opt" data-qi="${qi}" data-oi="${oi}">✕</button>
+                                <input class="fswp-opt-input" type="text" data-qi="${qi}" data-oi="${oi}" value="${esc(opt)}" placeholder="Opção ${LETTERS[oi]||oi+1} (deixe vazio para ignorar)">
+                                <button class="fswp-btn-rm-opt" data-qi="${qi}" data-oi="${oi}" title="Remover opção">✕</button>
                             </div>`).join('')}
-                        <button class="fswp-btn-add-opt" data-qi="${qi}">+ Opção</button></div>`
+                        <button class="fswp-btn-add-opt" data-qi="${qi}">+ Opção</button>
+                       </div>`
                     : `<p class="fswp-desc-note">↳ Campo de texto livre para o respondente</p>`;
 
                 card.innerHTML=`
                     <div class="fswp-q-header">
                         <span class="fswp-q-num">${qi+1}</span>
-                        <input class="fswp-q-label" type="text" data-qi="${qi}" value="${esc(q.label)}" placeholder="Digite a pergunta…">
                         <select class="fswp-q-type" data-qi="${qi}">
                             <option value="multiple"${q.type==='multiple'?' selected':''}>Múltipla Escolha</option>
                             <option value="text"${q.type==='text'?' selected':''}>Descritiva</option>
                         </select>
-                        <button class="fswp-btn-rm-q" data-qi="${qi}">🗑</button>
+                        <button class="fswp-btn-rm-q" data-qi="${qi}" title="Remover questão">🗑</button>
                     </div>
-                    <div class="fswp-q-body">${bodyHtml}</div>`;
+                    <div class="fswp-q-label-wrap">
+                        <input class="fswp-q-label" type="text" data-qi="${qi}" value="${esc(q.label)}" placeholder="Digite a pergunta aqui…">
+                    </div>
+                    <div class="fswp-q-body">${optsHtml}</div>`;
                 c.appendChild(card);
             });
 
@@ -659,13 +669,18 @@ function formsync_render_frontend_builder() {
             c.querySelectorAll('.fswp-btn-rm-opt').forEach(el=>el.addEventListener('click',function(){ questions[+this.dataset.qi].options.splice(+this.dataset.oi,1); renderQuestions(); }));
         }
 
-        // Save
+        // Save — filtra opções em branco antes de enviar
         $i('fswp-btn-save').addEventListener('click',function(){
             const slug=$i('fswp-edit-slug').value.trim();
             if(!slug){ alert('Informe o slug da pesquisa!'); return; }
+            // Clona e remove opções vazias
+            const payload = questions.map(q => ({
+                ...q,
+                options: q.type==='multiple' ? (q.options||[]).filter(o=>o.trim()!=='') : []
+            }));
             const btn=this;
             btn.disabled=true; btn.textContent='Salvando…';
-            post({action:'rene_save_questionnaire',nonce:NONCE,slug,questions_data:JSON.stringify(questions)}).then(res=>{
+            post({action:'rene_save_questionnaire',nonce:NONCE,slug,questions_data:JSON.stringify(payload)}).then(res=>{
                 if(res.success){
                     btn.textContent='✅ Salvo!';
                     $i('fswp-edit-slug').readOnly=true;
