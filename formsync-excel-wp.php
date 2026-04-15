@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.10
+ * Version: 1.0.11
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -92,6 +92,7 @@ function rene_surveys_render_shortcode($atts) {
     if ($query->have_posts()) {
         $query->the_post();
         $questions_json = get_post_meta(get_the_ID(), 'questions_data', true);
+        $config_json    = get_post_meta(get_the_ID(), 'survey_config', true) ?: '{}';
         wp_reset_postdata();
     } else {
         return '<div class="rene-survey-not-found">🚧 Esta pesquisa ainda está em criação. Em breve estará disponível.</div>';
@@ -99,11 +100,10 @@ function rene_surveys_render_shortcode($atts) {
 
     ob_start();
     ?>
-    <div class="rene-survey-container" data-slug="<?php echo esc_attr($slug); ?>" data-questions="<?php echo esc_attr($questions_json); ?>">
-        <div class="safesurvey-brand">
-            <span class="safesurvey-brand-icon">📊</span>
-            <span class="safesurvey-brand-name">FormSync Excel <strong>WP</strong></span>
-        </div>
+    <div class="rene-survey-container"
+         data-slug="<?php echo esc_attr($slug); ?>"
+         data-questions="<?php echo esc_attr($questions_json); ?>"
+         data-config="<?php echo esc_attr($config_json); ?>">
         <div id="rene-survey-app"></div>
     </div>
     <?php
@@ -334,6 +334,10 @@ function rene_handle_save_questionnaire() {
     if (!is_wp_error($post_id)) {
         update_post_meta($post_id, 'page_slug', $slug);
         update_post_meta($post_id, 'questions_data', $data);
+        // Salva config da pesquisa (página de apresentação)
+        if (!empty($_POST['config_data'])) {
+            update_post_meta($post_id, 'survey_config', stripslashes($_POST['config_data']));
+        }
         wp_send_json_success(array('message' => 'Questionário salvo!', 'id' => $post_id));
     } else {
         wp_send_json_error(array('message' => 'Erro ao criar/atualizar Post.'));
@@ -363,6 +367,7 @@ function formsync_ajax_get_surveys() {
             'title'     => $post->post_title,
             'slug'      => get_post_meta($post->ID, 'page_slug', true),
             'questions' => get_post_meta($post->ID, 'questions_data', true) ?: '[]',
+            'config'    => get_post_meta($post->ID, 'survey_config', true)  ?: '{}',
         ];
     }
     wp_send_json_success($surveys);
@@ -404,6 +409,45 @@ function formsync_render_frontend_builder() {
                         <input type="text" id="fswp-edit-slug" placeholder="ex: vinci">
                     </div>
                 </div>
+
+                <!-- Config: Página de Apresentação -->
+                <details class="fswp-config-section" open>
+                    <summary class="fswp-config-summary">📰 Página de Apresentação</summary>
+                    <div class="fswp-config-body">
+                        <div class="fswp-cfg-row">
+                            <label>Logo Esquerda (URL da imagem — fixo SSP/seu logo)</label>
+                            <input type="text" id="cfg-logo-left" placeholder="https://ssp.seg.br/.../logo.png">
+                        </div>
+                        <div class="fswp-cfg-row">
+                            <label>Logo Direita (URL logo do cliente)</label>
+                            <input type="text" id="cfg-logo-right" placeholder="https://...cliente-logo.png">
+                        </div>
+                        <div class="fswp-cfg-row">
+                            <label>Título principal (H1 branco no topo azul)</label>
+                            <input type="text" id="cfg-title" placeholder="Ex: CPFL — PESQUISA DE PERCEPÇÃO DE SS">
+                        </div>
+                        <div class="fswp-cfg-row">
+                            <label>Subtítulo (azul, abaixo)</label>
+                            <input type="text" id="cfg-subtitle" placeholder="Ex: Sua Percepção Sobre Segurança e Saúde">
+                        </div>
+                        <div class="fswp-cfg-row">
+                            <label>Descrição</label>
+                            <textarea id="cfg-description" rows="3" placeholder="Texto introdutório da pesquisa..."></textarea>
+                        </div>
+                        <div class="fswp-cfg-row">
+                            <label>Instruções Importantes (uma por linha)</label>
+                            <textarea id="cfg-instructions" rows="5" placeholder="Suas respostas são confidenciais;
+A sua participação é fundamental;"></textarea>
+                        </div>
+                        <div class="fswp-cfg-row">
+                            <label>Período de aplicação</label>
+                            <input type="text" id="cfg-period" placeholder="De 28/04 a 16/05/2025">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Questões -->
+                <div class="fswp-section-label">☱ Questões</div>
                 <div id="fswp-q-container"></div>
                 <div class="fswp-editor-footer">
                     <div style="display:flex;gap:8px;">
@@ -555,6 +599,33 @@ function formsync_render_frontend_builder() {
     .fswp-pb-divider span{flex:1;}
     .fswp-btn-rm-pb{background:transparent;border:none;color:#555;cursor:pointer;font-size:.85rem;padding:2px 6px;border-radius:4px;}
     .fswp-btn-rm-pb:hover{color:#f75a68;}
+    .fswp-config-section{
+        border:1px solid #2d3a5e;border-radius:8px;margin-bottom:12px;
+        overflow:hidden;background:#0d0d14;
+    }
+    .fswp-config-summary{
+        display:flex;align-items:center;gap:8px;
+        padding:10px 14px;cursor:pointer;font-size:.82rem;
+        font-weight:600;color:#8ba0cc;list-style:none;
+        user-select:none;
+    }
+    .fswp-config-summary::-webkit-details-marker{display:none;}
+    .fswp-config-summary::before{content:'▶';font-size:.65rem;transition:transform .2s;}
+    details[open] .fswp-config-summary::before{transform:rotate(90deg);}
+    .fswp-config-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;border-top:1px solid #1e2a45;}
+    .fswp-cfg-row label{display:block;color:#7a88a8;font-size:.75rem;margin-bottom:4px;}
+    .fswp-cfg-row input,.fswp-cfg-row textarea{
+        width:100%;box-sizing:border-box;
+        background:#121214;border:1px solid #323238;border-radius:6px;
+        color:#e1e1e6;padding:7px 10px;font-size:.85rem;font-family:inherit;
+    }
+    .fswp-cfg-row input:focus,.fswp-cfg-row textarea:focus{outline:none;border-color:#8257e5;}
+    .fswp-cfg-row textarea{resize:vertical;}
+    .fswp-section-label{
+        font-size:.72rem;font-weight:700;color:#555;text-transform:uppercase;
+        letter-spacing:.08em;padding:8px 0 4px;margin-bottom:6px;
+        border-top:1px solid #2a2a30;
+    }
     </style>
 
     <script>
@@ -600,20 +671,29 @@ function formsync_render_frontend_builder() {
                     const el=document.createElement('div');
                     el.className='fswp-survey-item';
                     el.innerHTML=`<div class="fswp-survey-info"><strong>${esc(s.title)}</strong><span>/${esc(s.slug)}</span></div><button class="fswp-btn-primary" style="flex-shrink:0">Editar</button>`;
-                    el.querySelector('button').addEventListener('click',()=>openEditor(s.slug,s.questions,false));
+                    el.querySelector('button').addEventListener('click',()=>openEditor(s.slug,s.questions,false,s.config||'{}'));
                     $i('fswp-surveys-list').appendChild(el);
                 });
             }).catch(()=>{ $i('fswp-surveys-list').innerHTML='<p class="fswp-bl-empty" style="color:#f75a68">Erro ao carregar.</p>'; });
         }
 
-        $i('fswp-btn-new').addEventListener('click',()=>openEditor('','[]',true));
+        $i('fswp-btn-new').addEventListener('click',()=>openEditor('','[]',true,'{}'));
         $i('fswp-btn-back').addEventListener('click',loadList);
 
         // Editor
-        function openEditor(slug,qJson,isNew){
+        function openEditor(slug,qJson,isNew,cfgJson){
             $i('fswp-edit-slug').value=$i('fswp-edit-slug').defaultValue=slug;
             $i('fswp-edit-slug').readOnly=!isNew;
             try{ questions=JSON.parse(qJson||'[]'); }catch{ questions=[]; }
+            // Populate config fields
+            let cfg={}; try{ cfg=JSON.parse(cfgJson||'{}'); }catch{}
+            $i('cfg-logo-left').value  = cfg.logo_left    || '';
+            $i('cfg-logo-right').value = cfg.logo_right   || '';
+            $i('cfg-title').value      = cfg.title        || '';
+            $i('cfg-subtitle').value   = cfg.subtitle     || '';
+            $i('cfg-description').value= cfg.description  || '';
+            $i('cfg-instructions').value = (cfg.instructions||[]).join('\n');
+            $i('cfg-period').value     = cfg.period       || '';
             renderQuestions();
             showView('editor');
         }
@@ -693,18 +773,32 @@ function formsync_render_frontend_builder() {
             c.querySelectorAll('.fswp-btn-rm-opt').forEach(el=>el.addEventListener('click',function(){ questions[+this.dataset.qi].options.splice(+this.dataset.oi,1); renderQuestions(); }));
         }
 
-        // Save — filtra opções em branco antes de enviar
+        // Save — filtra opções em branco e inclui config
         $i('fswp-btn-save').addEventListener('click',function(){
             const slug=$i('fswp-edit-slug').value.trim();
             if(!slug){ alert('Informe o slug da pesquisa!'); return; }
-            // Clona e remove opções vazias
             const payload = questions.map(q => ({
                 ...q,
                 options: q.type==='multiple' ? (q.options||[]).filter(o=>o.trim()!=='') : []
             }));
+            // Lê campos de config
+            const instrRaw = $i('cfg-instructions').value;
+            const config = {
+                logo_left    : $i('cfg-logo-left').value.trim(),
+                logo_right   : $i('cfg-logo-right').value.trim(),
+                title        : $i('cfg-title').value.trim(),
+                subtitle     : $i('cfg-subtitle').value.trim(),
+                description  : $i('cfg-description').value.trim(),
+                instructions : instrRaw.split('\n').map(l=>l.trim()).filter(l=>l),
+                period       : $i('cfg-period').value.trim(),
+            };
             const btn=this;
             btn.disabled=true; btn.textContent='Salvando…';
-            post({action:'rene_save_questionnaire',nonce:NONCE,slug,questions_data:JSON.stringify(payload)}).then(res=>{
+            post({
+                action:'rene_save_questionnaire',nonce:NONCE,slug,
+                questions_data:JSON.stringify(payload),
+                config_data:JSON.stringify(config)
+            }).then(res=>{
                 if(res.success){
                     btn.textContent='✅ Salvo!';
                     $i('fswp-edit-slug').readOnly=true;

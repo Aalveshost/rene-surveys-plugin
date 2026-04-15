@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const appDiv = document.getElementById('rene-survey-app');
     const slug   = container.getAttribute('data-slug');
     let allQuestions = [];
+    let config = {};
 
     try {
         allQuestions = JSON.parse(container.getAttribute('data-questions'));
@@ -12,6 +13,13 @@ document.addEventListener('DOMContentLoaded', function () {
         appDiv.innerHTML = '<p class="error">Erro ao carregar o questionário.</p>';
         return;
     }
+
+    try {
+        config = JSON.parse(container.getAttribute('data-config') || '{}');
+    } catch (e) { config = {}; }
+
+    const hasIntro = !!(config.title || config.subtitle || config.description);
+    let onIntro = hasIntro;
 
     if (!allQuestions.length) {
         appDiv.innerHTML = '<p class="empty-msg">Nenhuma pergunta encontrada para este questionário.</p>';
@@ -28,11 +36,55 @@ document.addEventListener('DOMContentLoaded', function () {
             buf.push(q);
         }
     });
+
+    // ── Página de Apresentação ─────────────────────────────────────────
+    function renderIntroPage() {
+        const logoLeft  = config.logo_left  ? `<img src="${escHtml(config.logo_left)}" alt="Logo" class="survey-intro-logo">` : '';
+        const logoRight = config.logo_right ? `<img src="${escHtml(config.logo_right)}" alt="Logo cliente" class="survey-intro-logo survey-intro-logo--right">` : '';
+
+        let instHtml = '';
+        if (config.instructions && config.instructions.length) {
+            instHtml = `<div class="survey-intro-instructions">
+                <strong>Instruções Importantes:</strong>
+                <ul>${config.instructions.map(i => `<li>${escHtml(i)}</li>`).join('')}</ul>
+            </div>`;
+        }
+
+        appDiv.innerHTML = `
+        <div class="survey-intro">
+            <div class="survey-intro-header">
+                <div class="survey-intro-logos">
+                    ${logoLeft}
+                    ${logoRight}
+                </div>
+                ${config.title ? `<h1 class="survey-intro-title">${escHtml(config.title)}</h1>` : ''}
+            </div>
+            <div class="survey-intro-body">
+                ${config.subtitle    ? `<h2 class="survey-intro-subtitle">${escHtml(config.subtitle)}</h2>` : ''}
+                ${config.description ? `<p class="survey-intro-desc">${escHtml(config.description)}</p>` : ''}
+                ${instHtml}
+                ${config.period      ? `<p class="survey-intro-period">Período de aplicação da pesquisa: ${escHtml(config.period)}</p>` : ''}
+                <div class="survey-intro-footer">
+                    <button class="btn-premium" id="fswp-btn-seguinte">Seguinte</button>
+                </div>
+            </div>
+        </div>`;
+
+        document.getElementById('fswp-btn-seguinte').addEventListener('click', () => {
+            onIntro = false;
+            renderPage(0);
+        });
+    }
+
     if (buf.length) pages.push(buf);
 
-    if (!pages.length) {
+    if (!pages.length && !onIntro) {
         appDiv.innerHTML = '<p class="empty-msg">Nenhuma pergunta encontrada.</p>';
         return;
+    }
+
+    if (onIntro) {
+        renderIntroPage();
     }
 
     // Índice global para numerar as questões correto
