@@ -297,5 +297,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(s).replace(/\\n/g, '\n').split('\n').map(line => escHtml(line)).join('<br>');
     }
 
-    renderPage(0);
+    if (!onIntro && pages.length) {
+        renderPage(0);
+    }
 });

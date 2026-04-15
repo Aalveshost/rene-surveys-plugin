@@ -93,7 +93,7 @@ function rene_surveys_render_shortcode($atts) {
         $query->the_post();
         $questions_json = get_post_meta(get_the_ID(), 'questions_data', true);
         $config_json    = get_post_meta(get_the_ID(), 'survey_config', true)
-                       ?: get_post_meta(get_the_ID(), 'survey_description', true)
+                       ?: get_post_meta(get_the_ID(), 'surveyform_description', true)
                        ?: '{}';
         wp_reset_postdata();
     } else {
@@ -339,10 +339,10 @@ function rene_handle_save_questionnaire() {
     if (!is_wp_error($post_id)) {
         update_post_meta($post_id, 'page_slug', $slug);
         update_post_meta($post_id, 'questions_data', $data);
-        // Salva config no survey_config (interno) E no survey_description (JetEngine)
+        // Salva config no survey_config (interno) E no surveyform_description (JetEngine)
         $config_raw = isset($_POST['config_data']) ? stripslashes($_POST['config_data']) : '{}';
         update_post_meta($post_id, 'survey_config', $config_raw);
-        update_post_meta($post_id, 'survey_description', $config_raw);
+        update_post_meta($post_id, 'surveyform_description', $config_raw);
         wp_send_json_success(array('message' => 'Questionário salvo!', 'id' => $post_id));
     } else {
         wp_send_json_error(array('message' => 'Erro ao criar/atualizar Post.'));
@@ -373,7 +373,7 @@ function formsync_ajax_get_surveys() {
             'slug'      => get_post_meta($post->ID, 'page_slug', true),
             'questions' => get_post_meta($post->ID, 'questions_data', true) ?: '[]',
             'config'    => get_post_meta($post->ID, 'survey_config', true)
-                        ?: get_post_meta($post->ID, 'survey_description', true)
+                        ?: get_post_meta($post->ID, 'surveyform_description', true)
                         ?: '{}',
         ];
     }
@@ -880,7 +880,7 @@ A sua participação é fundamental;" style="max-height:160px;"></textarea>
                 is_new: isNew ? 1 : 0,
                 questions_data:JSON.stringify(payload),
                 config_data:JSON.stringify(config),
-                survey_description:JSON.stringify(config)
+                surveyform_description:JSON.stringify(config)
             }).then(res=>{
                 if(res.success){
                     btn.textContent='✅ Salvo!';
