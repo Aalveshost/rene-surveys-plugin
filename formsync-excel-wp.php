@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.30
+ * Version: 1.0.31
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -21,7 +21,7 @@ add_action('elementor/widgets/register', function($widgets_manager) {
     $widgets_manager->register(new FormSync_Elementor_Widget());
 });
 
-define('FSWP_VER', '1.0.30');
+define('FSWP_VER', '1.0.31');
 
 // 1. Enfileirar Scripts e Estilos para o Front-end
 add_action('wp_enqueue_scripts', 'rene_surveys_enqueue_scripts');
@@ -446,17 +446,8 @@ function formsync_render_frontend_builder() {
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Descrição</label>
-                            <textarea id="cfg-description" rows="8" placeholder="Texto introdutório da pesquisa..." style="font-family:monospace;resize:vertical;line-height:1.5;"></textarea>
-                            <p style="font-size:.85rem;color:#a9a9b2;margin:4px 0 0 0;">💡 Pressione Enter para quebras de linha.</p>
-                        </div>
-                        <div class="fswp-cfg-row">
-                            <label>Instruções Importantes (uma por linha)</label>
-                            <textarea id="cfg-instructions" rows="4" placeholder="Suas respostas são confidenciais;
-A sua participação é fundamental;" style="max-height:160px;"></textarea>
-                        </div>
-                        <div class="fswp-cfg-row">
-                            <label>Período de aplicação</label>
-                            <input type="text" id="cfg-period" placeholder="De 28/04 a 16/05/2025">
+                            <textarea id="cfg-description" rows="12" placeholder="Cole o texto aqui. Use **negrito** para destacar. Enter para quebrar linha." style="font-family:monospace;resize:vertical;line-height:1.6;"></textarea>
+                            <p style="font-size:.82rem;color:#a9a9b2;margin:4px 0 0 0;">💡 Use **texto** para <strong>negrito</strong>. Enter para quebrar linha.</p>
                         </div>
                     </div>
                 </details>

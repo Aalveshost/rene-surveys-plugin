@@ -293,8 +293,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function escHtmlWithLineBreaks(s) {
-        // Normaliza tanto \n real quanto \n literal (legado)
-        return String(s).replace(/\\n/g, '\n').split('\n').map(line => escHtml(line)).join('<br>');
+        return String(s).replace(/\\n/g, '\n').split('\n').map(line => {
+            return escHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        }).join('<br>');
     }
 
     if (!onIntro && pages.length) {
