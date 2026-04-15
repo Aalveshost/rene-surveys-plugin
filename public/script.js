@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function escHtmlWithLineBreaks(s) {
-        return escHtml(s).replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+        return String(s).split('\n').map(line => escHtml(line)).join('<br>');
     }
 
     renderPage(0);
