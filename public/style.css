@@ -97,7 +97,7 @@
     font-weight: 600;
 }
 .section-label {
-    font-family: "Tahoma", sans-serif !important;
+    font-family: -apple-system, "system-ui", "Segoe UI", Roboto, sans-serif !important;
     font-size: 20px !important;
     font-weight: 500 !important;
     color: #0A57BE !important;
@@ -246,6 +246,7 @@
 
 .question-label {
     display: block;
+    font-family: "Tahoma", sans-serif !important;
     font-size: 1rem;
     font-weight: 700;
     color: #333333;
@@ -291,7 +292,8 @@
 .radio-custom { display: none; }
 
 .radio-label-text {
-    font-size: .97rem;
+    font-family: -apple-system, "system-ui", "Segoe UI", Roboto, sans-serif !important;
+    font-size: 16px !important;
     color: #333333;
     line-height: 1.4;
 }
@@ -312,8 +314,8 @@
     border-radius: 4px;
     padding: 10px 12px;
     color: #333;
-    font-size: .97rem;
-    font-family: inherit;
+    font-size: 16px !important;
+    font-family: -apple-system, "system-ui", "Segoe UI", Roboto, sans-serif !important;
     transition: border-color .15s;
     resize: vertical;
 }
