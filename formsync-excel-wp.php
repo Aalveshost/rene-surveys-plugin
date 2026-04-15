@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.23
+ * Version: 1.0.24
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -21,12 +21,14 @@ add_action('elementor/widgets/register', function($widgets_manager) {
     $widgets_manager->register(new FormSync_Elementor_Widget());
 });
 
+define('FSWP_VER', '1.0.24');
+
 // 1. Enfileirar Scripts e Estilos para o Front-end
 add_action('wp_enqueue_scripts', 'rene_surveys_enqueue_scripts');
 function rene_surveys_enqueue_scripts() {
     // Carrega sempre no front-end (Elementor não expe has_shortcode no post_content)
-    wp_enqueue_style('rene-surveys-style', plugin_dir_url(__FILE__) . 'public/style.css', array(), '1.0');
-    wp_enqueue_script('rene-surveys-script', plugin_dir_url(__FILE__) . 'public/script.js', array('jquery'), '1.0', true);
+    wp_enqueue_style('rene-surveys-style', plugin_dir_url(__FILE__) . 'public/style.css', array(), FSWP_VER);
+    wp_enqueue_script('rene-surveys-script', plugin_dir_url(__FILE__) . 'public/script.js', array('jquery'), FSWP_VER, true);
 
     // Passar dados do PHP para o JS
     wp_localize_script('rene-surveys-script', 'ReneSurveysData', array(
@@ -41,7 +43,7 @@ function rene_surveys_admin_scripts($hook) {
     if ('toplevel_page_rene-survey-builder' !== $hook) {
         return;
     }
-    wp_enqueue_script('rene-builder-script', plugin_dir_url(__FILE__) . 'admin/builder.js', array('jquery'), '1.0', true);
+    wp_enqueue_script('rene-builder-script', plugin_dir_url(__FILE__) . 'admin/builder.js', array('jquery'), FSWP_VER, true);
     wp_localize_script('rene-builder-script', 'ReneBuilderData', array(
         'nonce' => wp_create_nonce('rene_builder_nonce')
     ));
