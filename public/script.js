@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const btn = form.querySelector('.btn-submit');
                 const msgDiv = document.getElementById('survey-message');
                 btn.disabled = true;
-                btn.textContent = 'Enviando...';
+                btn.innerHTML = '<span class="btn-spinner"></span> Enviando…';
 
                 const payload = new URLSearchParams();
                 payload.append('action', 'rene_submit_survey');
@@ -168,12 +168,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .then(r => r.json())
                 .then(data => {
-                    msgDiv.classList.remove('hidden', 'error', 'success');
                     if (data.success) {
-                        msgDiv.classList.add('success');
-                        msgDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> ${data.data.message}`;
-                        setTimeout(() => { form.style.display = 'none'; }, 500);
+                        // Fade out form
+                        form.style.transition = 'opacity .35s ease';
+                        form.style.opacity = '0';
+                        setTimeout(() => {
+                            appDiv.innerHTML = `
+                            <div class="survey-success-screen">
+                                <div class="survey-success-icon">
+                                    <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle class="success-circle" cx="26" cy="26" r="25" stroke="#04d361" stroke-width="2" fill="none"/>
+                                        <polyline class="success-check" points="14,27 22,35 38,18" stroke="#04d361" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                    </svg>
+                                </div>
+                                <h2 class="survey-success-title">Pesquisa enviada!</h2>
+                                <p class="survey-success-sub">Obrigado pela sua participação. Suas respostas foram registradas com sucesso e serão analisadas pela nossa equipe.</p>
+                                <div class="survey-success-badge">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                    Resposta registrada com segurança
+                                </div>
+                            </div>`;
+                        }, 380);
                     } else {
+                        msgDiv.classList.remove('hidden');
                         msgDiv.classList.add('error');
                         msgDiv.innerHTML = data.data.message || 'Erro desconhecido.';
                         btn.disabled = false;
