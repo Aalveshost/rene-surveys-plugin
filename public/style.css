@@ -34,16 +34,18 @@
     gap: 16px;
     margin-bottom: 22px;
 }
-.survey-intro-logo {
-    max-height: 60px;
-    max-width: 240px;
-    object-fit: contain;
-    background: #fff;
-    border-radius: 6px;
-    padding: 6px 12px;
+.survey-intro-logo-col {
+    flex: 1;
+    flex-basis: 50%;
+    display: flex;
 }
-.survey-intro-logo--right {
-    /* cliente — alinha à direita, pode ter padding diferente */
+.survey-intro-logo-col.right {
+    justify-content: flex-end;
+}
+.survey-intro-logo {
+    max-height: 80px;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 /* H1 no header */
