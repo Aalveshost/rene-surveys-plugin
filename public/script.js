@@ -131,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function () {
             btnBack.addEventListener('click', () => {
                 currentPage--;
                 renderPage(currentPage);
-                scrollToForm();
             });
         }
 
@@ -142,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!validatePage(qs, form)) return;
                 currentPage++;
                 renderPage(currentPage);
-                scrollToForm();
             });
         }
 
