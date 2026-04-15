@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -341,4 +341,342 @@ function rene_handle_save_questionnaire() {
     } else {
         wp_send_json_error(array('message' => 'Erro ao criar/atualizar Post.'));
     }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 6. AJAX: Listar todos os questionários (front-end builder)
+// ═══════════════════════════════════════════════════════════════
+add_action('wp_ajax_formsync_get_surveys', 'formsync_ajax_get_surveys');
+function formsync_ajax_get_surveys() {
+    check_ajax_referer('rene_builder_nonce', 'nonce');
+    if (!current_user_can('manage_options')) wp_send_json_error(['message' => 'Acesso negado.']);
+
+    $posts = get_posts([
+        'post_type'      => 'questionarios',
+        'posts_per_page' => -1,
+        'post_status'    => 'publish',
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    ]);
+
+    $surveys = [];
+    foreach ($posts as $post) {
+        $surveys[] = [
+            'id'        => $post->ID,
+            'title'     => $post->post_title,
+            'slug'      => get_post_meta($post->ID, 'page_slug', true),
+            'questions' => get_post_meta($post->ID, 'questions_data', true) ?: '[]',
+        ];
+    }
+    wp_send_json_success($surveys);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 7. Front-end Builder Popup — visível só para alefxcosta@gmail.com
+// ═══════════════════════════════════════════════════════════════
+add_action('wp_footer', 'formsync_render_frontend_builder', 20);
+function formsync_render_frontend_builder() {
+    if (!is_user_logged_in()) return;
+    $user = wp_get_current_user();
+    if (!in_array('administrator', $user->roles) || $user->user_email !== 'alefxcosta@gmail.com') return;
+
+    $nonce    = wp_create_nonce('rene_builder_nonce');
+    $ajax_url = admin_url('admin-ajax.php');
+    ?>
+
+    <div id="fswp-bl-overlay" style="display:none" aria-modal="true" role="dialog">
+        <div id="fswp-bl-modal">
+            <div class="fswp-bl-header">
+                <span>📋 FormSync Builder</span>
+                <button id="fswp-bl-close">✕</button>
+            </div>
+
+            <div id="fswp-view-list">
+                <div class="fswp-bl-toolbar">
+                    <p class="fswp-bl-hint">Selecione uma pesquisa ou crie uma nova.</p>
+                    <button id="fswp-btn-new" class="fswp-btn-primary">+ Nova Pesquisa</button>
+                </div>
+                <div id="fswp-surveys-list"><p class="fswp-bl-loading">Carregando…</p></div>
+            </div>
+
+            <div id="fswp-view-editor" style="display:none">
+                <div class="fswp-bl-toolbar">
+                    <button id="fswp-btn-back" class="fswp-btn-ghost">← Voltar</button>
+                    <div class="fswp-slug-wrap">
+                        <label for="fswp-edit-slug">Slug:</label>
+                        <input type="text" id="fswp-edit-slug" placeholder="ex: vinci">
+                    </div>
+                </div>
+                <div id="fswp-q-container"></div>
+                <div class="fswp-editor-footer">
+                    <button id="fswp-btn-add-q" class="fswp-btn-ghost">+ Adicionar Questão</button>
+                    <button id="fswp-btn-save" class="fswp-btn-primary">💾 Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="fswp-bl-toggle" title="Abrir Builder de Pesquisas">✏️</button>
+
+    <style>
+    #fswp-bl-toggle {
+        position:fixed;bottom:80px;right:24px;z-index:99999;
+        width:48px;height:48px;border-radius:50%;
+        background:#2d2d35;color:#fff;border:1px solid #444;
+        font-size:1.2rem;cursor:pointer;
+        box-shadow:0 4px 12px rgba(0,0,0,.4);
+        transition:transform .2s,background .2s;
+    }
+    #fswp-bl-toggle:hover{background:#3d3d48;transform:scale(1.1);}
+    #fswp-bl-overlay{
+        position:fixed;inset:0;z-index:99997;
+        background:rgba(0,0,0,.75);backdrop-filter:blur(4px);
+        display:flex;align-items:center;justify-content:center;padding:20px;
+    }
+    #fswp-bl-modal{
+        background:#1a1a1e;border:1px solid #323238;border-radius:14px;
+        width:100%;max-width:620px;max-height:88vh;
+        display:flex;flex-direction:column;
+        box-shadow:0 24px 64px rgba(0,0,0,.7);
+        overflow:hidden;font-family:'Inter',sans-serif;
+        animation:fswp-si .2s ease;
+    }
+    @keyframes fswp-si{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fswp-bl-header{
+        display:flex;justify-content:space-between;align-items:center;
+        padding:16px 20px;background:#8257e5;color:#fff;
+        font-weight:700;font-size:.95rem;flex-shrink:0;
+    }
+    .fswp-bl-header button{
+        background:transparent;border:none;color:rgba(255,255,255,.8);
+        font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:4px;
+    }
+    .fswp-bl-header button:hover{background:rgba(255,255,255,.15);color:#fff;}
+    #fswp-view-list,#fswp-view-editor{overflow-y:auto;flex:1;padding:16px 20px;}
+    #fswp-view-editor{display:flex;flex-direction:column;}
+    .fswp-bl-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+    .fswp-bl-hint{color:#a9a9b2;font-size:.82rem;margin:0;}
+    .fswp-bl-loading,.fswp-bl-empty{color:#a9a9b2;font-size:.88rem;text-align:center;padding:32px 0;}
+    .fswp-survey-item{
+        display:flex;justify-content:space-between;align-items:center;
+        background:#121214;border:1px solid #323238;border-radius:8px;
+        padding:12px 16px;margin-bottom:10px;transition:border-color .15s;
+    }
+    .fswp-survey-item:hover{border-color:#8257e5;}
+    .fswp-survey-info strong{display:block;color:#e1e1e6;font-size:.9rem;}
+    .fswp-survey-info span{color:#8257e5;font-size:.78rem;font-family:monospace;}
+    .fswp-slug-wrap{display:flex;align-items:center;gap:8px;}
+    .fswp-slug-wrap label{color:#a9a9b2;font-size:.82rem;white-space:nowrap;}
+    .fswp-slug-wrap input{
+        background:#121214;border:1px solid #323238;border-radius:6px;
+        color:#e1e1e6;padding:6px 10px;font-size:.88rem;
+    }
+    .fswp-slug-wrap input:focus{outline:none;border-color:#8257e5;}
+    .fswp-slug-wrap input[readonly]{opacity:.5;cursor:not-allowed;}
+    .fswp-q-card{
+        background:#121214;border:1px solid #323238;border-radius:10px;
+        margin-bottom:10px;overflow:hidden;
+    }
+    .fswp-q-header{
+        display:flex;align-items:center;gap:10px;
+        padding:11px 14px;border-bottom:1px solid #323238;
+    }
+    .fswp-q-num{
+        width:26px;height:26px;border-radius:50%;
+        background:#8257e5;color:#fff;font-size:.78rem;font-weight:700;
+        display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    }
+    .fswp-q-label{
+        flex:1;background:transparent;border:none;
+        color:#e1e1e6;font-size:.9rem;min-width:0;
+    }
+    .fswp-q-label:focus{outline:none;}
+    .fswp-q-label::placeholder{color:#555;}
+    .fswp-q-type{
+        background:#1e1e24;border:1px solid #323238;border-radius:6px;
+        color:#a9a9b2;font-size:.78rem;padding:4px 8px;cursor:pointer;
+    }
+    .fswp-btn-rm-q{
+        background:transparent;border:none;color:#f75a68;
+        cursor:pointer;font-size:.95rem;padding:2px 6px;border-radius:4px;
+    }
+    .fswp-q-body{padding:12px 14px;}
+    .fswp-opt-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .fswp-opt-letter{
+        width:24px;height:24px;border-radius:50%;background:#2d2d35;
+        color:#8257e5;font-size:.75rem;font-weight:700;
+        display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    }
+    .fswp-opt-input{
+        flex:1;background:#1e1e24;border:1px solid #323238;border-radius:6px;
+        color:#e1e1e6;padding:6px 10px;font-size:.85rem;
+    }
+    .fswp-opt-input:focus{outline:none;border-color:#8257e5;}
+    .fswp-btn-rm-opt{
+        background:transparent;border:none;color:#555;
+        cursor:pointer;font-size:.85rem;padding:2px 6px;border-radius:4px;
+    }
+    .fswp-btn-rm-opt:hover{color:#f75a68;}
+    .fswp-btn-add-opt{
+        background:transparent;border:1px dashed #444;border-radius:6px;
+        color:#8257e5;font-size:.8rem;padding:5px 12px;cursor:pointer;margin-top:4px;
+    }
+    .fswp-btn-add-opt:hover{border-color:#8257e5;background:rgba(130,87,229,.05);}
+    .fswp-desc-note{color:#5c5c66;font-size:.82rem;font-style:italic;margin:0;}
+    .fswp-editor-footer{
+        display:flex;justify-content:space-between;align-items:center;
+        padding:14px 20px;border-top:1px solid #323238;
+        background:#1a1a1e;flex-shrink:0;margin-top:auto;
+    }
+    .fswp-btn-primary{
+        background:#8257e5;color:#fff;border:none;border-radius:8px;
+        padding:8px 18px;font-size:.88rem;font-weight:600;cursor:pointer;
+        transition:background .15s,transform .15s;
+    }
+    .fswp-btn-primary:hover:not(:disabled){background:#996dff;transform:translateY(-1px);}
+    .fswp-btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+    .fswp-btn-ghost{
+        background:transparent;border:1px solid #444;color:#a9a9b2;
+        border-radius:8px;padding:7px 14px;font-size:.85rem;cursor:pointer;
+        transition:border-color .15s,color .15s;
+    }
+    .fswp-btn-ghost:hover{border-color:#8257e5;color:#e1e1e6;}
+    </style>
+
+    <script>
+    (function(){
+        'use strict';
+        const NONCE    = <?php echo json_encode($nonce); ?>;
+        const AJAX_URL = <?php echo json_encode($ajax_url); ?>;
+        const LETTERS  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let questions  = [];
+
+        function $i(id){ return document.getElementById(id); }
+        function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        function post(data){
+            const fd = new FormData();
+            Object.entries(data).forEach(([k,v])=>fd.append(k,v));
+            return fetch(AJAX_URL,{method:'POST',body:fd}).then(r=>r.json());
+        }
+        function showView(v){
+            $i('fswp-view-list').style.display   = v==='list'   ? 'block' : 'none';
+            $i('fswp-view-editor').style.display = v==='editor' ? 'flex'  : 'none';
+        }
+
+        // Toggle
+        $i('fswp-bl-toggle').addEventListener('click',()=>{
+            const ov=$i('fswp-bl-overlay');
+            if(ov.style.display==='none'){ ov.style.display='flex'; loadList(); }
+            else ov.style.display='none';
+        });
+        $i('fswp-bl-close').addEventListener('click',()=>$i('fswp-bl-overlay').style.display='none');
+        $i('fswp-bl-overlay').addEventListener('click',function(e){ if(e.target===this) this.style.display='none'; });
+
+        // List
+        function loadList(){
+            showView('list');
+            $i('fswp-surveys-list').innerHTML='<p class="fswp-bl-loading">Carregando…</p>';
+            post({action:'formsync_get_surveys',nonce:NONCE}).then(res=>{
+                if(!res.success||!res.data.length){
+                    $i('fswp-surveys-list').innerHTML='<p class="fswp-bl-empty">Nenhuma pesquisa cadastrada ainda.</p>';
+                    return;
+                }
+                $i('fswp-surveys-list').innerHTML='';
+                res.data.forEach(s=>{
+                    const el=document.createElement('div');
+                    el.className='fswp-survey-item';
+                    el.innerHTML=`<div class="fswp-survey-info"><strong>${esc(s.title)}</strong><span>/${esc(s.slug)}</span></div><button class="fswp-btn-primary" style="flex-shrink:0">Editar</button>`;
+                    el.querySelector('button').addEventListener('click',()=>openEditor(s.slug,s.questions,false));
+                    $i('fswp-surveys-list').appendChild(el);
+                });
+            }).catch(()=>{ $i('fswp-surveys-list').innerHTML='<p class="fswp-bl-empty" style="color:#f75a68">Erro ao carregar.</p>'; });
+        }
+
+        $i('fswp-btn-new').addEventListener('click',()=>openEditor('','[]',true));
+        $i('fswp-btn-back').addEventListener('click',loadList);
+
+        // Editor
+        function openEditor(slug,qJson,isNew){
+            $i('fswp-edit-slug').value=$i('fswp-edit-slug').defaultValue=slug;
+            $i('fswp-edit-slug').readOnly=!isNew;
+            try{ questions=JSON.parse(qJson||'[]'); }catch{ questions=[]; }
+            renderQuestions();
+            showView('editor');
+        }
+
+        $i('fswp-btn-add-q').addEventListener('click',()=>{
+            questions.push({id:'q_'+Date.now(),label:'',type:'multiple',options:['']});
+            renderQuestions();
+        });
+
+        function renderQuestions(){
+            const c=$i('fswp-q-container');
+            c.innerHTML='';
+            if(!questions.length){
+                c.innerHTML='<p class="fswp-bl-empty">Clique em "+ Adicionar Questão" para começar.</p>';
+                return;
+            }
+            questions.forEach((q,qi)=>{
+                const card=document.createElement('div');
+                card.className='fswp-q-card';
+                const bodyHtml = q.type==='multiple'
+                    ? `<div class="fswp-opts">
+                        ${(q.options||[]).map((opt,oi)=>`
+                            <div class="fswp-opt-row">
+                                <span class="fswp-opt-letter">${LETTERS[oi]||oi+1}</span>
+                                <input class="fswp-opt-input" type="text" data-qi="${qi}" data-oi="${oi}" value="${esc(opt)}" placeholder="Opção ${LETTERS[oi]||oi+1}">
+                                <button class="fswp-btn-rm-opt" data-qi="${qi}" data-oi="${oi}">✕</button>
+                            </div>`).join('')}
+                        <button class="fswp-btn-add-opt" data-qi="${qi}">+ Opção</button></div>`
+                    : `<p class="fswp-desc-note">↳ Campo de texto livre para o respondente</p>`;
+
+                card.innerHTML=`
+                    <div class="fswp-q-header">
+                        <span class="fswp-q-num">${qi+1}</span>
+                        <input class="fswp-q-label" type="text" data-qi="${qi}" value="${esc(q.label)}" placeholder="Digite a pergunta…">
+                        <select class="fswp-q-type" data-qi="${qi}">
+                            <option value="multiple"${q.type==='multiple'?' selected':''}>Múltipla Escolha</option>
+                            <option value="text"${q.type==='text'?' selected':''}>Descritiva</option>
+                        </select>
+                        <button class="fswp-btn-rm-q" data-qi="${qi}">🗑</button>
+                    </div>
+                    <div class="fswp-q-body">${bodyHtml}</div>`;
+                c.appendChild(card);
+            });
+
+            c.querySelectorAll('.fswp-q-label').forEach(el=>el.addEventListener('input',function(){ questions[+this.dataset.qi].label=this.value; }));
+            c.querySelectorAll('.fswp-q-type').forEach(el=>el.addEventListener('change',function(){
+                const q=questions[+this.dataset.qi];
+                q.type=this.value;
+                if(q.type==='multiple'&&!q.options?.length) q.options=[''];
+                renderQuestions();
+            }));
+            c.querySelectorAll('.fswp-btn-rm-q').forEach(el=>el.addEventListener('click',function(){
+                questions.splice(+this.dataset.qi,1); renderQuestions();
+            }));
+            c.querySelectorAll('.fswp-opt-input').forEach(el=>el.addEventListener('input',function(){ questions[+this.dataset.qi].options[+this.dataset.oi]=this.value; }));
+            c.querySelectorAll('.fswp-btn-add-opt').forEach(el=>el.addEventListener('click',function(){ questions[+this.dataset.qi].options.push(''); renderQuestions(); }));
+            c.querySelectorAll('.fswp-btn-rm-opt').forEach(el=>el.addEventListener('click',function(){ questions[+this.dataset.qi].options.splice(+this.dataset.oi,1); renderQuestions(); }));
+        }
+
+        // Save
+        $i('fswp-btn-save').addEventListener('click',function(){
+            const slug=$i('fswp-edit-slug').value.trim();
+            if(!slug){ alert('Informe o slug da pesquisa!'); return; }
+            const btn=this;
+            btn.disabled=true; btn.textContent='Salvando…';
+            post({action:'rene_save_questionnaire',nonce:NONCE,slug,questions_data:JSON.stringify(questions)}).then(res=>{
+                if(res.success){
+                    btn.textContent='✅ Salvo!';
+                    $i('fswp-edit-slug').readOnly=true;
+                    setTimeout(()=>{ btn.disabled=false; btn.textContent='💾 Salvar'; },2200);
+                } else {
+                    alert('Erro: '+(res.data?.message||'desconhecido'));
+                    btn.disabled=false; btn.textContent='💾 Salvar';
+                }
+            }).catch(()=>{ alert('Erro na comunicação.'); btn.disabled=false; btn.textContent='💾 Salvar'; });
+        });
+    })();
+    </script>
+    <?php
 }
