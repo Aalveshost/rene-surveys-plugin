@@ -304,7 +304,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function scrollToForm() {
-        window.scrollTo({ top: container.offsetTop - 32, behavior: 'smooth' });
+        // Tenta scrollar para a primeira questão da página atual
+        const firstQ = appDiv.querySelector('.question-block');
+        if (firstQ) {
+            firstQ.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            window.scrollTo({ top: container.offsetTop - 32, behavior: 'smooth' });
+        }
     }
 
     function escHtml(s) {
