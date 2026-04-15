@@ -106,6 +106,12 @@
     margin-block-start: .5rem !important;
     display: block;
 }
+.section-label strong, 
+.section-label .survey-text-blue,
+.question-label strong,
+.question-label .survey-text-blue {
+    font-weight: 500 !important;
+}
 
 /* Descrição */
 .survey-intro-desc {
