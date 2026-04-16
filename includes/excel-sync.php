@@ -1,6 +1,6 @@
 <?php
 /**
- * Lógica de sincronização com o Excel (Dinamica e Alternável)
+ * Lógica de sincronização com o Excel (Dinamica, Alternável e com Logs)
  */
 
 if (!defined('ABSPATH')) {
@@ -68,17 +68,21 @@ function rene_v2_run_excel_sync() {
     $args = array(
         'post_type'      => 'respostas_survey',
         'post_status'    => 'publish',
-        'posts_per_page' => 100,
+        'posts_per_page' => 50, // Processa blocos menores para evitar timeout
         'meta_query'     => array(
             'relation' => 'OR',
             array('key' => 'excel_sync_status', 'compare' => 'NOT EXISTS'),
             array('key' => 'excel_sync_status', 'value' => 'pending', 'compare' => '='),
+            array('key' => 'excel_sync_status', 'value' => 'failed', 'compare' => '='),
         ),
     );
 
     $query = new WP_Query($args);
 
     if ($query->have_posts()) {
+        $count = $query->post_count;
+        fswp_add_log("Iniciando varredura de sincronização. Encontrados: $count pendentes.", 'info');
+
         while ($query->have_posts()) {
             $query->the_post();
             $post_id = get_the_ID();
@@ -86,21 +90,15 @@ function rene_v2_run_excel_sync() {
             $answers_json = get_post_meta($post_id, 'survey_answers', true);
             $answers = json_decode($answers_json, true);
 
-            // Tenta sincronizar
             $sync_result = rene_v2_custom_excel_handler($post_id, $slug, $answers);
-
-            // Sync_result pode ser: 
-            // true (sucesso)
-            // false (erro na api)
-            // null (sincronização desativada para este slug)
 
             if ($sync_result === true) {
                 update_post_meta($post_id, 'excel_sync_status', 'synced');
                 update_post_meta($post_id, 'excel_sync_date', current_time('mysql'));
+                fswp_add_log("Resposta #$post_id ($slug) enviada com sucesso.", 'success');
             } elseif ($sync_result === false) {
                 update_post_meta($post_id, 'excel_sync_status', 'failed');
             }
-            // Se for null, deixamos como pending para tentar depois se o usuário ativar
         }
         wp_reset_postdata();
     }
@@ -116,17 +114,22 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
         'meta_value' => $slug,
         'posts_per_page' => 1
     ]);
-    if (!$surveys) return null;
+    if (!$surveys) {
+        fswp_add_log("Erro: Pesquisa com slug '$slug' não encontrada para a resposta #$post_id.", 'failed');
+        return null;
+    }
     
     $config_json = get_post_meta($surveys[0]->ID, 'survey_config', true) ?: '{}';
     $config = json_decode($config_json, true);
     
-    // VERIFICA SE ESTÁ ATIVO
     $is_enabled = isset($config['sync_enabled']) ? $config['sync_enabled'] : true;
     if (!$is_enabled) return null;
 
     $endpoint = isset($config['spreadsheet_url']) ? $config['spreadsheet_url'] : '';
-    if (empty($endpoint)) return null;
+    if (empty($endpoint)) {
+        fswp_add_log("Erro: Webhook URL não configurada para '$slug'.", 'failed');
+        return null;
+    }
 
     $raw_title = get_the_title($post_id);
     preg_match('/#(\d+)$/', $raw_title, $matches);
@@ -136,7 +139,7 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
         'post_title' => $titulo,
         'timestamp'  => current_time('mysql'),
         'slug'       => $slug,
-        'empresa'    => $surveys[0]->post_title, // Título da pesquisa (Ex: Questionário: VINCI)
+        'empresa'    => $surveys[0]->post_title,
     ];
 
     $questions_json = get_post_meta($surveys[0]->ID, 'questions_data', true) ?: '[]';
@@ -156,9 +159,19 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
     $url_final = add_query_arg(array_map('urlencode', $mapa_dados), $endpoint);
     $response = wp_remote_get($url_final, ['timeout' => 30]);
 
-    if (is_wp_error($response)) return false;
+    if (is_wp_error($response)) {
+        $msg = $response->get_error_message();
+        fswp_add_log("Erro conexão (#$post_id): $msg", 'failed');
+        return false;
+    }
+
     $code = wp_remote_retrieve_response_code($response);
     $body = wp_remote_retrieve_body($response);
 
-    return ($code == 200 && strpos(strtolower($body), 'sucesso') !== false);
+    if ($code == 200 && strpos(strtolower($body), 'sucesso') !== false) {
+        return true;
+    } else {
+        fswp_add_log("Erro Google (#$post_id): Código $code. Body: " . substr($body, 0, 100), 'failed');
+        return false;
+    }
 }

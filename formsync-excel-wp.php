@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.2.3
+ * Version: 1.3.1
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -21,7 +21,7 @@ add_action('elementor/widgets/register', function($widgets_manager) {
     $widgets_manager->register(new FormSync_Elementor_Widget());
 });
 
-define('FSWP_VER', '1.1.7');
+define('FSWP_VER', '1.3.0');
 
 // 1. Enfileirar Scripts e Estilos para o Front-end
 add_action('wp_enqueue_scripts', 'rene_surveys_enqueue_scripts');
@@ -61,6 +61,70 @@ function rene_surveys_menu() {
         'dashicons-clipboard',
         30
     );
+}
+
+// 1.3 Registro de CPTs e Logs
+add_action('init', function() {
+    register_post_type('fswp_log', [
+        'public' => false,
+        'show_ui' => false,
+        'supports' => ['title', 'editor']
+    ]);
+});
+
+add_action('admin_menu', function() {
+    add_submenu_page(
+        'edit.php?post_type=questionarios',
+        'Logs de Sincronização',
+        'Logs (Sync)',
+        'manage_options',
+        'fswp-logs',
+        'fswp_render_logs_page'
+    );
+});
+
+function fswp_render_logs_page() {
+    fswp_cleanup_old_logs();
+    $logs = get_posts(['post_type' => 'fswp_log', 'posts_per_page' => 100, 'orderby' => 'date', 'order' => 'DESC']);
+    ?>
+    <div class="wrap" style="background:#1a1a1e; padding: 25px; border-radius: 12px; color: #fff; margin-top:20px; font-family: 'Inter', sans-serif;">
+        <h1 style="color:#8257e5; margin-bottom:20px; font-weight: 700;">📋 Logs de Sincronização</h1>
+        <p style="color:#7a88a8; margin-bottom:20px;">Exibindo os últimos registros (retenção de 15 dias).</p>
+        <table class="widefat" style="background:#121214; border:1px solid #323238; border-collapse: collapse; width:100%; color:#e1e1e6;">
+            <thead>
+                <tr style="background:#2d2d35; text-align: left;">
+                    <th style="padding:15px; border:1px solid #323238;">Data/Hora</th>
+                    <th style="padding:15px; border:1px solid #323238;">Mensagem</th>
+                    <th style="padding:15px; border:1px solid #323238;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if($logs): foreach($logs as $log): 
+                    $status = get_post_meta($log->ID, '_log_status', true);
+                    $color = ($status == 'success') ? '#4caf50' : (($status == 'failed') ? '#f44336' : '#ff9800');
+                ?>
+                <tr style="border-bottom:1px solid #323238;">
+                    <td style="padding:12px; opacity:0.7;"><?php echo get_the_date('d/m H:i:s', $log->ID); ?></td>
+                    <td style="padding:12px;"><?php echo esc_html($log->post_content); ?></td>
+                    <td style="padding:12px;"><span style="background:<?php echo $color; ?>22; color:<?php echo $color; ?>; padding:4px 10px; border-radius:4px; font-size:0.75rem; font-weight:700;"><?php echo strtoupper($status); ?></span></td>
+                </tr>
+                <?php endforeach; else: ?>
+                <tr><td colspan="3" style="padding:40px; text-align:center; color:#7a88a8;">Nenhum log encontrado.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php
+}
+
+function fswp_add_log($message, $status = 'info') {
+    $log_id = wp_insert_post(['post_type' => 'fswp_log', 'post_title' => 'Log', 'post_content' => $message, 'post_status' => 'publish']);
+    update_post_meta($log_id, '_log_status', $status);
+}
+
+function fswp_cleanup_old_logs() {
+    $old = get_posts(['post_type' => 'fswp_log', 'posts_per_page' => -1, 'date_query' => [['before'=>'15 days ago']], 'fields' => 'ids']);
+    foreach($old as $id) wp_delete_post($id, true);
 }
 
 function rene_surveys_render_builder() {
