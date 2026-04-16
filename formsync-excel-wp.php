@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.59
+ * Version: 1.0.60
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -369,14 +369,22 @@ function formsync_ajax_get_surveys() {
 
     $surveys = [];
     foreach ($posts as $post) {
+        $cfg = get_post_meta($post->ID, 'survey_config', true)
+            ?: get_post_meta($post->ID, 'surveyform_description', true)
+            ?: '{}';
+        
+        // Se o WordPress retornar como array (serializado), converte para JSON string
+        // para que o JS openEditor(..., cfgJson) funcione corretamente com JSON.parse
+        if (is_array($cfg) || is_object($cfg)) {
+            $cfg = json_encode($cfg);
+        }
+
         $surveys[] = [
             'id'        => $post->ID,
             'title'     => $post->post_title,
             'slug'      => get_post_meta($post->ID, 'page_slug', true),
             'questions' => get_post_meta($post->ID, 'questions_data', true) ?: '[]',
-            'config'    => get_post_meta($post->ID, 'survey_config', true)
-                        ?: get_post_meta($post->ID, 'surveyform_description', true)
-                        ?: '{}',
+            'config'    => $cfg,
         ];
     }
     wp_send_json_success($surveys);
@@ -735,7 +743,13 @@ function formsync_render_frontend_builder() {
             $i('fswp-edit-slug').readOnly=!isNew;
             try{ questions=JSON.parse(qJson||'[]'); }catch{ questions=[]; }
             // Populate config fields
-            let cfg={}; try{ cfg=JSON.parse(cfgJson||'{}'); }catch{}
+            try {
+                if (typeof cfgJson === 'string') {
+                    cfg = JSON.parse(cfgJson || '{}');
+                } else if (typeof cfgJson === 'object' && cfgJson !== null) {
+                    cfg = cfgJson;
+                }
+            } catch (e) { cfg = {}; }
             $i('cfg-logo-left').value  = cfg.logo_left    || '';
             $i('cfg-logo-right').value = cfg.logo_right   || '';
             $i('cfg-logo-right-cover').checked = cfg.logo_right_cover || false;
