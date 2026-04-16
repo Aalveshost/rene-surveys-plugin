@@ -1,6 +1,6 @@
 <?php
 /**
- * Lógica de sincronização com o Excel (Dinamica)
+ * Lógica de sincronização com o Excel (Dinamica e Alternável)
  */
 
 if (!defined('ABSPATH')) {
@@ -14,7 +14,6 @@ function fswp_v2_reschedule_cron() {
     $interval_sec = fswp_v2_get_shortest_interval();
     $hook = 'rene_v2_excel_sync_cron';
 
-    // Se o intervalo mudou, precisamos reagendar
     $current_interval = get_option('fswp_current_sync_interval', 300);
 
     if ($interval_sec != $current_interval || !wp_next_scheduled($hook)) {
@@ -24,7 +23,6 @@ function fswp_v2_reschedule_cron() {
     }
 }
 
-// 2. Registrar o intervalo dinâmico no cron_schedules
 add_filter('cron_schedules', function($schedules) {
     $interval_sec = get_option('fswp_current_sync_interval', 300);
     $schedules['fswp_dynamic_interval'] = array(
@@ -35,17 +33,19 @@ add_filter('cron_schedules', function($schedules) {
 });
 
 /**
- * Pega o menor intervalo configurado entre todas as pesquisas ativas
+ * Pega o menor intervalo configurado entre todas as pesquisas ATIVAS
  */
 function fswp_v2_get_shortest_interval() {
     $surveys = get_posts(['post_type' => 'questionarios', 'posts_per_page' => -1]);
-    $min_sec = 300; // Default 5 min
+    $min_sec = 300; 
 
     foreach ($surveys as $s) {
         $config_json = get_post_meta($s->ID, 'survey_config', true) ?: '{}';
         $config = json_decode($config_json, true);
         
-        if (!empty($config['spreadsheet_url']) && !empty($config['sync_interval'])) {
+        $is_enabled = isset($config['sync_enabled']) ? $config['sync_enabled'] : true;
+        
+        if ($is_enabled && !empty($config['spreadsheet_url']) && !empty($config['sync_interval'])) {
             $val = intval($config['sync_interval']);
             $unit = isset($config['sync_unit']) ? $config['sync_unit'] : 'minutes';
             
@@ -86,12 +86,21 @@ function rene_v2_run_excel_sync() {
             $answers_json = get_post_meta($post_id, 'survey_answers', true);
             $answers = json_decode($answers_json, true);
 
+            // Tenta sincronizar
             $sync_result = rene_v2_custom_excel_handler($post_id, $slug, $answers);
 
-            if ($sync_result) {
+            // Sync_result pode ser: 
+            // true (sucesso)
+            // false (erro na api)
+            // null (sincronização desativada para este slug)
+
+            if ($sync_result === true) {
                 update_post_meta($post_id, 'excel_sync_status', 'synced');
                 update_post_meta($post_id, 'excel_sync_date', current_time('mysql'));
+            } elseif ($sync_result === false) {
+                update_post_meta($post_id, 'excel_sync_status', 'failed');
             }
+            // Se for null, deixamos como pending para tentar depois se o usuário ativar
         }
         wp_reset_postdata();
     }
@@ -107,13 +116,17 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
         'meta_value' => $slug,
         'posts_per_page' => 1
     ]);
-    if (!$surveys) return false;
+    if (!$surveys) return null;
     
     $config_json = get_post_meta($surveys[0]->ID, 'survey_config', true) ?: '{}';
     $config = json_decode($config_json, true);
-    $endpoint = isset($config['spreadsheet_url']) ? $config['spreadsheet_url'] : '';
     
-    if (empty($endpoint)) return false;
+    // VERIFICA SE ESTÁ ATIVO
+    $is_enabled = isset($config['sync_enabled']) ? $config['sync_enabled'] : true;
+    if (!$is_enabled) return null;
+
+    $endpoint = isset($config['spreadsheet_url']) ? $config['spreadsheet_url'] : '';
+    if (empty($endpoint)) return null;
 
     $raw_title = get_the_title($post_id);
     preg_match('/#(\d+)$/', $raw_title, $matches);
