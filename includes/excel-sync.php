@@ -7,10 +7,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// 1. Agendar o Cron (5 minutos)
-if (!wp_next_scheduled('rene_survey_excel_sync_cron')) {
-    wp_schedule_event(time(), 'five_minutes', 'rene_survey_excel_sync_cron');
-}
+add_action('init', function() {
+    if (!wp_next_scheduled('rene_survey_excel_sync_cron')) {
+        wp_schedule_event(time(), 'five_minutes', 'rene_survey_excel_sync_cron');
+    }
+});
 
 add_filter('cron_schedules', function($schedules) {
     if (!isset($schedules['five_minutes'])) {
