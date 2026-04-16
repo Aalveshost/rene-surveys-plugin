@@ -7,25 +7,26 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// 1. Agendar o Cron (5 minutos) - Usando nomes únicos para evitar conflito com Code Snippets
 add_action('init', function() {
-    if (!wp_next_scheduled('rene_survey_excel_sync_cron')) {
-        wp_schedule_event(time(), 'five_minutes', 'rene_survey_excel_sync_cron');
+    if (!wp_next_scheduled('rene_v2_excel_sync_cron')) {
+        wp_schedule_event(time(), 'rene_v2_five_minutes', 'rene_v2_excel_sync_cron');
     }
 });
 
 add_filter('cron_schedules', function($schedules) {
-    if (!isset($schedules['five_minutes'])) {
-        $schedules['five_minutes'] = array('interval' => 300, 'display' => 'A cada 5 minutos');
+    if (!isset($schedules['rene_v2_five_minutes'])) {
+        $schedules['rene_v2_five_minutes'] = array('interval' => 300, 'display' => 'A cada 5 minutos (FormSync v2)');
     }
     return $schedules;
 });
 
-add_action('rene_survey_excel_sync_cron', 'rene_run_excel_sync');
+add_action('rene_v2_excel_sync_cron', 'rene_v2_run_excel_sync');
 
 /**
  * Função principal disparada pelo Cron
  */
-function rene_run_excel_sync() {
+function rene_v2_run_excel_sync() {
     // Busca posts do CPT "respostas_survey" que ainda não foram sincronizados
     $args = array(
         'post_type'      => 'respostas_survey',
@@ -53,12 +54,12 @@ function rene_run_excel_sync() {
             $post_id = get_the_ID();
             
             // Pega os dados
-            $slug = get_post_meta($post_id, 'page_slug', true); // O slug da página
+            $slug = get_post_meta($post_id, 'page_slug', true); 
             $answers_json = get_post_meta($post_id, 'survey_answers', true);
             $answers = json_decode($answers_json, true);
 
-            // Chama a função de integração do usuário
-            $sync_result = rene_custom_excel_export_handler($post_id, $slug, $answers);
+            // Chama o handler de exportação
+            $sync_result = rene_v2_custom_excel_handler($post_id, $slug, $answers);
 
             if ($sync_result) {
                 update_post_meta($post_id, 'excel_sync_status', 'synced');
@@ -72,13 +73,10 @@ function rene_run_excel_sync() {
 }
 
 /**
- * ESPAÇO PARA O USUÁRIO: INSIRA SEU SCRIPT DE EXCEL AQUI
- * 
- * Esta função deve retornar true em caso de sucesso no envio para a planilha.
+ * Lógica adaptada do seu Snippet original para o novo formato do Plugin
  */
-function rene_custom_excel_export_handler($post_id, $slug, $answers) {
+function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
     // 1. Busca a configuração da pesquisa para pegar a URL da planilha
-    $survey_id = 0;
     $surveys = get_posts([
         'post_type' => 'questionarios',
         'meta_key' => 'page_slug',
@@ -93,8 +91,7 @@ function rene_custom_excel_export_handler($post_id, $slug, $answers) {
     
     if (empty($endpoint)) return false;
 
-    // 2. Prepara os dados para o Google Sheets
-    // Pega o título/ID da resposta
+    // 2. Prepara os dados para o Google Sheets (Estilo GET do seu Snippet)
     $raw_title = get_the_title($post_id);
     preg_match('/#(\d+)$/', $raw_title, $matches);
     $titulo = isset($matches[1]) ? '#' . $matches[1] : $raw_title;
@@ -105,14 +102,17 @@ function rene_custom_excel_export_handler($post_id, $slug, $answers) {
         'slug'       => $slug,
     ];
 
-    // Mapeia todas as respostas
+    // Mapeia todas as respostas JSON para parâmetros individuais
     if (is_array($answers)) {
         foreach ($answers as $qid => $val) {
-            $mapa_dados['q_' . $qid] = $val;
+            // Se o ID for numérico (pergunta-4), mantemos o padrão
+            // Se for ID gerado pelo builder (q_177...), mandamos como q_ID
+            $key = (is_numeric($qid)) ? 'pergunta_' . $qid : 'q_' . $qid;
+            $mapa_dados[$key] = $val;
         }
     }
 
-    // 3. Envia via GET (como no seu script original)
+    // 3. Envia via GET (wp_remote_get)
     $url_final = add_query_arg(array_map('urlencode', $mapa_dados), $endpoint);
     $response = wp_remote_get($url_final, ['timeout' => 30]);
 
@@ -121,6 +121,6 @@ function rene_custom_excel_export_handler($post_id, $slug, $answers) {
     $code = wp_remote_retrieve_response_code($response);
     $body = wp_remote_retrieve_body($response);
 
-    // Verifica sucesso (200 + palavra "sucesso" no corpo, como no seu script)
+    // Critério de sucesso do seu Snippet original
     return ($code == 200 && strpos(strtolower($body), 'sucesso') !== false);
 }

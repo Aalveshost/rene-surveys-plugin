@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.81
+ * Version: 1.1.1
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -12,8 +12,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// 0. Incluir componentes (Sync temporariamente desativado)
-// require_once plugin_dir_path(__FILE__) . 'includes/excel-sync.php';
+// 0. Incluir componentes
+require_once plugin_dir_path(__FILE__) . 'includes/excel-sync.php';
 
 // 0.1 Registrar Widget Elementor (se o Elementor estiver ativo)
 add_action('elementor/widgets/register', function($widgets_manager) {
@@ -21,7 +21,7 @@ add_action('elementor/widgets/register', function($widgets_manager) {
     $widgets_manager->register(new FormSync_Elementor_Widget());
 });
 
-define('FSWP_VER', '1.0.80');
+define('FSWP_VER', '1.1.0');
 
 // 1. Enfileirar Scripts e Estilos para o Front-end
 add_action('wp_enqueue_scripts', 'rene_surveys_enqueue_scripts');
@@ -441,6 +441,11 @@ function formsync_render_frontend_builder() {
                             <input type="text" id="cfg-logo-left" placeholder="https://ssp.seg.br/.../logo.png">
                         </div>
                         <div class="fswp-cfg-row">
+                            <label>Planilha Webhook URL (Google Apps Script)</label>
+                            <input type="text" id="cfg-spreadsheet-url" placeholder="https://script.google.com/macros/s/.../exec">
+                            <p style="font-size:.72rem;color:#7a88a8;margin:3px 0 0 0;">💡 Respostas serão enviadas via GET (q_ID=valor...)</p>
+                        </div>
+                        <div class="fswp-cfg-row">
                             <label>Logo Direita (URL logo do cliente)</label>
                             <div style="display:flex; gap:10px;">
                                 <input type="text" id="cfg-logo-right" placeholder="https://...cliente-logo.png" style="flex:1;">
@@ -761,6 +766,7 @@ function formsync_render_frontend_builder() {
                 }
             } catch (e) { cfg = {}; }
             $i('cfg-logo-left').value  = cfg.logo_left    || '';
+            $i('cfg-spreadsheet-url').value = cfg.spreadsheet_url || '';
             $i('cfg-logo-right').value = cfg.logo_right   || '';
             $i('cfg-logo-right-cover').checked = cfg.logo_right_cover || false;
             $i('cfg-title').value      = cfg.title        || '';
@@ -933,6 +939,7 @@ function formsync_render_frontend_builder() {
             // Lê campos de config
             const config = {
                 logo_left       : $i('cfg-logo-left').value.trim(),
+                spreadsheet_url : $i('cfg-spreadsheet-url').value.trim(),
                 logo_right      : $i('cfg-logo-right').value.trim(),
                 logo_right_cover: $i('cfg-logo-right-cover').checked,
                 title           : $i('cfg-title').value.trim(),
