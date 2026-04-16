@@ -23,7 +23,7 @@
 
 /* Header azul */
 .survey-intro-header {
-    background: #0a57be;
+    background: #0270c5;
     padding: 28px 36px 32px;
 }
 
@@ -89,7 +89,7 @@
 
 /* Subtítulo azul */
 .survey-intro-subtitle {
-    color: #0a57be;
+    color: #0270c5;
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0 0 14px;
@@ -101,18 +101,18 @@
     font-family: "Tahoma", sans-serif;
     font-size: 20px;
     font-weight: 500;
-    color: #0A57BE;
+    color: #0270c5;
     margin: 8px 0 4px;
 }
 .survey-text-blue {
-    color: #0A57BE;
+    color: #0270c5;
     font-weight: 600;
 }
 .section-label {
     font-family: -apple-system, "system-ui", "Segoe UI", Roboto, sans-serif !important;
     font-size: 20px !important;
     font-weight: 500 !important;
-    color: #0A57BE !important;
+    color: #0270c5 !important;
     line-height: 1.2 !important;
     margin-block-end: 1rem !important;
     margin-block-start: .5rem !important;
@@ -138,7 +138,7 @@
 /* Instruções */
 .survey-intro-instructions {
     background: #f7f9fc;
-    border-left: 3px solid #0a57be;
+    border-left: 3px solid #0270c5;
     padding: 14px 18px;
     border-radius: 0 6px 6px 0;
     margin-bottom: 20px;
@@ -162,7 +162,7 @@
 }
 .survey-intro-instructions ul li::before {
     content: '• ';
-    color: #0a57be;
+    color: #0270c5;
 }
 
 /* Período */
@@ -182,7 +182,7 @@
     color: #333;
     margin: 24px 0 8px;
     padding-bottom: 6px;
-    border-bottom: 2px solid #0a57be;
+    border-bottom: 2px solid #0270c5;
 }
 
 /* Footer com botão Seguinte */
@@ -233,8 +233,8 @@
     flex-shrink: 0;
 }
 .step-node.step-active {
-    border-color: #0a57be;
-    color: #0a57be;
+    border-color: #0270c5;
+    color: #0270c5;
     background: #f0f7ff;
 }
 .step-node.step-completed {
@@ -322,7 +322,7 @@
 .radio-option input[type="radio"] {
     width: 17px;
     height: 17px;
-    accent-color: #0a57be;
+    accent-color: #0270c5;
     cursor: pointer;
     flex-shrink: 0;
     margin: 0;
@@ -339,7 +339,7 @@
 }
 .radio-option:has(input:checked) .radio-label-text {
     font-weight: 500;
-    color: #0a57be;
+    color: #0270c5;
 }
 .radio-option:has(input:checked) {
     background: #f0f5ff;
@@ -361,7 +361,7 @@
 }
 .text-input-premium:focus {
     outline: none;
-    border-color: #0a57be;
+    border-color: #0270c5;
     box-shadow: 0 0 0 2px rgba(10,87,190,.1);
 }
 .text-input-premium::placeholder { color: #aaa; }
@@ -482,7 +482,7 @@
 }
 
 .success-circle {
-    stroke: #0a57be;
+    stroke: #0270c5;
     stroke-dasharray: 157;
     stroke-dashoffset: 157;
     animation: draw-circle .55s ease forwards;
@@ -490,7 +490,7 @@
 @keyframes draw-circle { to { stroke-dashoffset: 0; } }
 
 .success-check {
-    stroke: #0a57be;
+    stroke: #0270c5;
     stroke-dasharray: 36;
     stroke-dashoffset: 36;
     animation: draw-check .35s .5s ease forwards;
@@ -518,7 +518,7 @@
     gap: 7px;
     background: #f0f5ff;
     border: 1px solid #c8d9f5;
-    color: #0a57be;
+    color: #0270c5;
     font-size: .8rem;
     font-weight: 500;
     padding: 6px 14px;
