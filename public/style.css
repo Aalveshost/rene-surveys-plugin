@@ -45,13 +45,13 @@
 }
 .survey-intro-logo {
     height: auto !important;
-    max-height: 90px !important;
+    max-height: 110px !important;
     width: auto !important;
-    max-width: 240px !important;
+    max-width: 260px !important;
     object-fit: contain !important;
     background: #fff !important;
     border-radius: 6px !important;
-    padding: 10px !important;
+    padding: 4px !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
     box-sizing: border-box !important;
 }
@@ -85,8 +85,8 @@
     margin-bottom: 32px;
 }
 .survey-intro-header.survey-intro-header--small .survey-intro-logo {
-    max-height: 70px !important;
-    max-width: 180px !important;
+    max-height: 90px !important;
+    max-width: 200px !important;
 }
 
 /* Corpo branco */
