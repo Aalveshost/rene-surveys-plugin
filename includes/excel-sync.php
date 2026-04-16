@@ -1,6 +1,7 @@
 <?php
 /**
  * Lógica de sincronização com o Excel (Dinamica, Alternável e com Logs)
+ * Versão 1.3.5 - Refinamento de mapeamento e throttling
  */
 
 if (!defined('ABSPATH')) {
@@ -68,7 +69,7 @@ function rene_v2_run_excel_sync() {
     $args = array(
         'post_type'      => 'respostas_survey',
         'post_status'    => 'publish',
-        'posts_per_page' => 50, // Processa blocos menores para evitar timeout
+        'posts_per_page' => 25, // Reduzido para maior estabilidade por ciclo
         'meta_query'     => array(
             'relation' => 'OR',
             array('key' => 'excel_sync_status', 'compare' => 'NOT EXISTS'),
@@ -81,7 +82,7 @@ function rene_v2_run_excel_sync() {
 
     if ($query->have_posts()) {
         $count = $query->post_count;
-        fswp_add_log("Iniciando varredura de sincronização. Encontrados: $count pendentes.", 'info');
+        fswp_add_log("Iniciando varredura. Encontrados: $count pendentes.", 'info');
 
         while ($query->have_posts()) {
             $query->the_post();
@@ -95,10 +96,12 @@ function rene_v2_run_excel_sync() {
             if ($sync_result === true) {
                 update_post_meta($post_id, 'excel_sync_status', 'synced');
                 update_post_meta($post_id, 'excel_sync_date', current_time('mysql'));
-                fswp_add_log("Resposta #$post_id ($slug) enviada com sucesso.", 'success');
             } elseif ($sync_result === false) {
                 update_post_meta($post_id, 'excel_sync_status', 'failed');
             }
+            
+            // Throttling: Pequeno delay entre envios para não sobrecarregar
+            usleep(300000); // 0.3 segundos
         }
         wp_reset_postdata();
     }
@@ -114,10 +117,7 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
         'meta_value' => $slug,
         'posts_per_page' => 1
     ]);
-    if (!$surveys) {
-        fswp_add_log("Erro: Pesquisa com slug '$slug' não encontrada para a resposta #$post_id.", 'failed');
-        return null;
-    }
+    if (!$surveys) return null;
     
     $config_json = get_post_meta($surveys[0]->ID, 'survey_config', true) ?: '{}';
     $config = json_decode($config_json, true);
@@ -126,20 +126,19 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
     if (!$is_enabled) return null;
 
     $endpoint = isset($config['spreadsheet_url']) ? $config['spreadsheet_url'] : '';
-    if (empty($endpoint)) {
-        fswp_add_log("Erro: Webhook URL não configurada para '$slug'.", 'failed');
-        return null;
-    }
+    if (empty($endpoint)) return null;
 
     $raw_title = get_the_title($post_id);
     preg_match('/#(\d+)$/', $raw_title, $matches);
     $titulo = isset($matches[1]) ? '#' . $matches[1] : $raw_title;
 
+    // Limpa o nome da empresa
+    $empresa_nome = str_replace('Questionário: ', '', $surveys[0]->post_title);
+
     $mapa_dados = [
         'post_title' => $titulo,
         'timestamp'  => current_time('mysql'),
-        'slug'       => $slug,
-        'empresa'    => $surveys[0]->post_title,
+        'empresa'    => $empresa_nome,
     ];
 
     $questions_json = get_post_meta($surveys[0]->ID, 'questions_data', true) ?: '[]';
@@ -148,8 +147,16 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
     if (is_array($questions) && is_array($answers)) {
         $idx = 4;
         foreach ($questions as $q) {
+            $type = isset($q['type']) ? $q['type'] : '';
+            
+            // IGNORA BLOCOS QUE NÃO SÃO PERGUNTAS (Títulos e Quebras)
+            if ($type === 'section_title' || $type === 'page_break') {
+                continue; 
+            }
+
             $qid = isset($q['id']) ? $q['id'] : '';
             if (empty($qid)) continue;
+
             $val = isset($answers[$qid]) ? $answers[$qid] : '';
             $mapa_dados['pergunta_' . $idx] = $val;
             $idx++;
@@ -157,11 +164,10 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
     }
 
     $url_final = add_query_arg(array_map('urlencode', $mapa_dados), $endpoint);
-    $response = wp_remote_get($url_final, ['timeout' => 30]);
+    $response = wp_remote_get($url_final, ['timeout' => 45]); // Timeout maior para segurança
 
     if (is_wp_error($response)) {
-        $msg = $response->get_error_message();
-        fswp_add_log("Erro conexão (#$post_id): $msg", 'failed');
+        fswp_add_log("Erro conexão (#$post_id): " . $response->get_error_message(), 'failed');
         return false;
     }
 
@@ -171,7 +177,7 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
     if ($code == 200 && strpos(strtolower($body), 'sucesso') !== false) {
         return true;
     } else {
-        fswp_add_log("Erro Google (#$post_id): Código $code. Body: " . substr($body, 0, 100), 'failed');
+        fswp_add_log("Erro Google (#$post_id): Código $code. Body snippet: " . substr($body, 0, 80), 'failed');
         return false;
     }
 }
