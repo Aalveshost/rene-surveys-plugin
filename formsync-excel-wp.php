@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.63
+ * Version: 1.0.65
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -447,25 +447,27 @@ function formsync_render_frontend_builder() {
                         <div class="fswp-cfg-row">
                             <label>Título principal (H1 branco no topo azul)</label>
                             <input type="text" id="cfg-title" placeholder="Ex: CPFL — PESQUISA DE PERCEPÇÃO DE SS">
+                            <p style="font-size:.72rem;color:#7a88a8;margin:3px 0 0 0;">💡 **negrito**, ***azul***</p>
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Subtítulo (azul, abaixo)</label>
                             <input type="text" id="cfg-subtitle" placeholder="Ex: Sua Percepção Sobre Segurança e Saúde">
+                            <p style="font-size:.72rem;color:#7a88a8;margin:3px 0 0 0;">💡 **negrito**, ***azul***</p>
                         </div>
                         <div class="fswp-cfg-row" style="display:flex; gap:14px;">
                             <div class="fswp-date-field" style="flex:1;">
-                                <label>Data de Início (opcional)</label>
+                                <label>Data de Início (Hoje: <?php echo date('d/m/Y'); ?>)</label>
                                 <input id="cfg-start-date" type="date">
                             </div>
                             <div class="fswp-date-field" style="flex:1;">
-                                <label>Data de Término (opcional)</label>
+                                <label>Data de Término (Opcional)</label>
                                 <input id="cfg-end-date" type="date">
                             </div>
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Descrição</label>
                             <textarea id="cfg-description" rows="12" placeholder="Cole o texto aqui. Use **negrito** para destacar. Enter para quebrar linha." style="font-family:monospace;resize:vertical;line-height:1.6;"></textarea>
-                            <p style="font-size:.82rem;color:#a9a9b2;margin:4px 0 0 0;">💡 Use **texto** para <strong>negrito</strong>. Enter para quebrar linha.</p>
+                            <p style="font-size:.82rem;color:#a9a9b2;margin:4px 0 0 0;">💡 **negrito**, ***azul***. Enter para quebrar linha.</p>
                         </div>
                     </div>
                 </details>
