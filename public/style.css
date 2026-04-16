@@ -44,18 +44,21 @@
     justify-content: flex-end;
 }
 .survey-intro-logo {
-    height: 100px !important;
-    width: 260px !important;
-    max-width: 100% !important;
+    height: auto !important;
+    max-height: 90px !important;
+    width: auto !important;
+    max-width: 240px !important;
     object-fit: contain !important;
     background: #fff !important;
     border-radius: 6px !important;
-    padding: 8px !important;
+    padding: 10px !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
     box-sizing: border-box !important;
 }
 .survey-intro-logo.survey-intro-logo--cover {
     object-fit: cover !important;
+    width: 240px !important;
+    height: 90px !important;
 }
 
 /* H1 no header */
@@ -82,8 +85,8 @@
     margin-bottom: 32px;
 }
 .survey-intro-header.survey-intro-header--small .survey-intro-logo {
-    height: 60px !important;
-    width: 160px !important;
+    max-height: 70px !important;
+    max-width: 180px !important;
 }
 
 /* Corpo branco */
@@ -424,6 +427,25 @@
 }
 .btn-premium.btn-submit:hover:not(:disabled) {
     background-color: #218838 !important;
+}
+
+.btn-nav.btn-back {
+    background-color: transparent !important;
+    color: #4a9dfa !important;
+    border: 1.5px solid #4a9dfa !important;
+    font-family: inherit;
+    font-weight: 600;
+    border-radius: 10px !important;
+    padding: 8px 18px !important;
+    cursor: pointer;
+    font-size: .92rem;
+    transition: all .2s;
+    margin-right: 12px;
+}
+.btn-nav.btn-back:hover {
+    background-color: #f0f7ff !important;
+    color: #0270c5 !important;
+    border-color: #0270c5 !important;
 }
 
 /* ── Messages ─────────────────────────────────────── */
