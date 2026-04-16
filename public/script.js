@@ -322,10 +322,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function scrollToForm() {
-        // Tenta scrollar para a primeira questão da página atual
-        const firstQ = appDiv.querySelector('.question-block');
-        if (firstQ) {
-            firstQ.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Ancora na barra de progresso (stepper)
+        const stepper = appDiv.querySelector('.survey-stepper');
+        if (stepper) {
+            stepper.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
             window.scrollTo({ top: container.offsetTop - 32, behavior: 'smooth' });
         }

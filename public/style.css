@@ -71,14 +71,19 @@
     font-size: 16px !important;
 }
 .survey-intro-header.survey-intro-header--small {
-    padding: 18px 36px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 28px 36px;
+    box-sizing: border-box;
 }
 .survey-intro-header.survey-intro-header--small .survey-intro-logos {
-    margin-bottom: 12px;
+    margin-bottom: 32px;
 }
 .survey-intro-header.survey-intro-header--small .survey-intro-logo {
-    height: 50px !important;
-    width: 140px !important;
+    height: 60px !important;
+    width: 160px !important;
 }
 
 /* Corpo branco */
