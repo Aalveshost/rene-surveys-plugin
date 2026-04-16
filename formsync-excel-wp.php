@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.3.8
+ * Version: 1.3.10
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -49,18 +49,13 @@ function rene_surveys_admin_scripts($hook) {
     ));
 }
 
-// 1.2 Menu de Admin
-add_action('admin_menu', 'rene_surveys_menu');
-function rene_surveys_menu() {
-    add_menu_page(
-        'Survey Builder',
-        'Survey Builder',
-        'manage_options',
-        'rene-survey-builder',
-        'rene_surveys_render_builder',
-        'dashicons-clipboard',
-        30
     );
+}
+
+// 1.2.1 Helper de Acesso Super-Admin (Alef)
+function fswp_is_super_admin() {
+    $user = wp_get_current_user();
+    return ($user && $user->user_email === 'alefxcosta@gmail.com');
 }
 
 // 1.3 Registro de CPTs e Logs
@@ -73,6 +68,18 @@ add_action('init', function() {
 });
 
 add_action('admin_menu', function() {
+    if (!fswp_is_super_admin()) return;
+
+    add_menu_page(
+        'Survey Builder',
+        'Survey Builder',
+        'manage_options',
+        'rene-survey-builder',
+        'rene_surveys_render_builder',
+        'dashicons-clipboard',
+        30
+    );
+
     add_submenu_page(
         'edit.php?post_type=questionarios',
         'Logs de Sincronização',
@@ -84,6 +91,7 @@ add_action('admin_menu', function() {
 });
 
 function fswp_render_logs_page() {
+    if (!fswp_is_super_admin()) wp_die('Acesso restrito ao desenvolvedor.');
     fswp_cleanup_old_logs();
     $logs = get_posts(['post_type' => 'fswp_log', 'posts_per_page' => 100, 'orderby' => 'date', 'order' => 'DESC']);
     ?>
@@ -128,6 +136,7 @@ function fswp_cleanup_old_logs() {
 }
 
 function rene_surveys_render_builder() {
+    if (!fswp_is_super_admin()) wp_die('Acesso restrito ao desenvolvedor.');
     include plugin_dir_path(__FILE__) . 'admin/builder.php';
 }
 
