@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.1.8
+ * Version: 1.1.9
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -436,26 +436,44 @@ function formsync_render_frontend_builder() {
                 <details class="fswp-config-section" open>
                     <summary class="fswp-config-summary">📰 Página de Apresentação</summary>
                     <div class="fswp-config-body">
-                        <div class="fswp-cfg-row" style="background: rgba(130, 87, 229, 0.05); padding: 10px; border-radius: 8px; border: 1px dashed rgba(130, 87, 229, 0.2); margin-bottom: 20px;">
-                            <label style="color: #996dff;">🔗 Planilha Webhook URL (Google Apps Script)</label>
-                            <input type="text" id="cfg-spreadsheet-url" placeholder="https://script.google.com/macros/s/.../exec">
-                            <p style="font-size:.72rem;color:#7a88a8;margin:3px 0 0 0;">💡 Configuração técnica: Respostas serão enviadas via GET.</p>
+                        <div class="fswp-cfg-row" style="background: rgba(130, 87, 229, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(130, 87, 229, 0.15); margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            <label style="color: #a38cf4; font-weight: 600; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                                <span style="font-size: 1.1rem;">🔗</span> Planilha Webhook URL (Google Apps Script)
+                            </label>
+                            <input type="text" id="cfg-spreadsheet-url" placeholder="https://script.google.com/macros/s/.../exec" style="background: #151518; border: 1px solid #323238; color: #fff; padding: 10px; border-radius: 6px; width: 100%; margin-bottom: 5px;">
+                            <p style="font-size:0.75rem; color:#7a88a8; margin: 0 0 15px 0; opacity: 0.8;">💡 As respostas serão enviadas via parâmetros GET para este endpoint.</p>
                             
-                            <div style="margin-top:15px; border-top: 1px solid rgba(130,87,229,0.1); padding-top:10px;">
-                                <label style="font-size:0.75rem; color:#996dff;">⏱️ Frequência de Sincronização</label>
-                                <div style="display:flex; gap:8px;">
-                                    <input type="number" id="cfg-sync-interval" value="5" style="width:70px; height:32px;">
-                                    <select id="cfg-sync-unit" style="flex:1; height:32px; background:#1e1e22; border:1px solid #323238; color:#fff; border-radius:4px; padding:0 5px;">
-                                        <option value="seconds">Segundos</option>
-                                        <option value="minutes" selected>Minutos</option>
-                                        <option value="hours">Horas</option>
-                                    </select>
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 15px; border-top: 1px solid rgba(130,87,229,0.1);">
+                                <div style="flex: 1;">
+                                    <label style="font-size:0.75rem; color:#a38cf4; display: block; margin-bottom: 5px; font-weight: 600;">⏱️ Frequência</label>
+                                    <div style="display: flex; gap: 5px;">
+                                        <input type="number" id="cfg-sync-interval" value="5" min="1" style="width: 60px; height: 34px; background: #1e1e22; border: 1px solid #323238; color: #fff; border-radius: 4px; text-align: center;">
+                                        <select id="cfg-sync-unit" style="flex: 1; height: 34px; background: #1e1e22; border: 1px solid #323238; color: #fff; border-radius: 4px; padding: 0 8px; font-size: 0.85rem;">
+                                            <option value="seconds">Segundos</option>
+                                            <option value="minutes" selected>Minutos</option>
+                                            <option value="hours">Horas</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <label style="display:flex; align-items:center; gap:8px; margin-top:12px; cursor:pointer; color:#996dff; font-size:0.8rem;">
-                                    <input type="checkbox" id="cfg-sync-enabled" checked> Ativar Sincronização Automática
-                                </label>
+                                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                                    <label style="font-size:0.75rem; color:#a38cf4; margin-bottom: 8px; font-weight: 600;">Estado do Sync</label>
+                                    <label class="fswp-switch">
+                                        <input type="checkbox" id="cfg-sync-enabled" checked>
+                                        <span class="fswp-slider round"></span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
+
+                        <style>
+                        /* Switch Premium Toggle */
+                        .fswp-switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+                        .fswp-switch input { opacity: 0; width: 0; height: 0; }
+                        .fswp-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #323238; transition: .3s; border-radius: 34px; }
+                        .fswp-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: #fff; transition: .3s; border-radius: 50%; }
+                        input:checked + .fswp-slider { background-color: #8257e5; }
+                        input:checked + .fswp-slider:before { transform: translateX(22px); }
+                        </style>
                         <div class="fswp-cfg-row">
                             <label>Logo Esquerda (URL da imagem — fixo SSP/seu logo)</label>
                             <input type="text" id="cfg-logo-left" placeholder="https://ssp.seg.br/.../logo.png">
