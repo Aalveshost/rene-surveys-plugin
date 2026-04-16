@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.65
+ * Version: 1.0.66
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -132,11 +132,16 @@ function rene_handle_survey_submission() {
     ));
 
     if (!is_wp_error($post_id)) {
-        // Salva o JSON no post meta
+        // Salva metadados da resposta
         update_post_meta($post_id, 'survey_answers', $answers);
+        update_post_meta($post_id, 'page_slug', $slug);
+        
+        // Inicializa status de sincronização (JetEngine)
+        update_post_meta($post_id, 'excel_sync_status', 'pending');
+        update_post_meta($post_id, 'excel_sync_date', '');
 
-        // AQUI ENTRA A INTEGRAÇÃO COM EXCEL
-        // do_action('rene_survey_saved', $post_id, $slug, $answers);
+        // Log opcional para integração
+        do_action('rene_survey_saved', $post_id, $slug, $answers);
 
         wp_send_json_success(array('message' => 'Pesquisa enviada com sucesso!', 'post_id' => $post_id));
     } else {

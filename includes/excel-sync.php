@@ -70,11 +70,9 @@ function rene_run_excel_sync() {
  */
 function rene_custom_excel_export_handler($post_id, $slug, $answers) {
     
-    // --- COLE SEU SCRIPT ABAIXO ---
-    // Exemplo: error_log("Sincronizando Post $post_id para a planilha...");
+    // --- COLE SEU SCRIPT ABAIXO (ex: Webhook, API Excel, etc) ---
+    // error_log("Sincronizando Post $post_id para a planilha...");
     
-    // Você pode usar cURL para enviar para uma URL ou salvar um arquivo .csv / .xlsx
-    
-    // Simulação de sucesso
-    return true; 
+    // IMPORTANTE: Retorne true APENAS quando a sincronização for confirmada.
+    return false; // Por padrão, mantém como 'pending'
 }
