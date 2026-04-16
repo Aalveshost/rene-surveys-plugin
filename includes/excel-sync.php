@@ -136,6 +136,7 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
         'post_title' => $titulo,
         'timestamp'  => current_time('mysql'),
         'slug'       => $slug,
+        'empresa'    => $surveys[0]->post_title, // Título da pesquisa (Ex: Questionário: VINCI)
     ];
 
     $questions_json = get_post_meta($surveys[0]->ID, 'questions_data', true) ?: '[]';
