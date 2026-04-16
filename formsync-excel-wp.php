@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.1.2
+ * Version: 1.1.4
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -436,14 +436,14 @@ function formsync_render_frontend_builder() {
                 <details class="fswp-config-section" open>
                     <summary class="fswp-config-summary">📰 Página de Apresentação</summary>
                     <div class="fswp-config-body">
+                        <div class="fswp-cfg-row" style="background: rgba(130, 87, 229, 0.05); padding: 10px; border-radius: 8px; border: 1px dashed rgba(130, 87, 229, 0.2); margin-bottom: 20px;">
+                            <label style="color: #996dff;">🔗 Planilha Webhook URL (Google Apps Script)</label>
+                            <input type="text" id="cfg-spreadsheet-url" placeholder="https://script.google.com/macros/s/.../exec">
+                            <p style="font-size:.72rem;color:#7a88a8;margin:3px 0 0 0;">💡 Configuração técnica: Respostas serão enviadas via GET.</p>
+                        </div>
                         <div class="fswp-cfg-row">
                             <label>Logo Esquerda (URL da imagem — fixo SSP/seu logo)</label>
                             <input type="text" id="cfg-logo-left" placeholder="https://ssp.seg.br/.../logo.png">
-                        </div>
-                        <div class="fswp-cfg-row">
-                            <label>Planilha Webhook URL (Google Apps Script)</label>
-                            <input type="text" id="cfg-spreadsheet-url" placeholder="https://script.google.com/macros/s/.../exec">
-                            <p style="font-size:.72rem;color:#7a88a8;margin:3px 0 0 0;">💡 Respostas serão enviadas via GET (q_ID=valor...)</p>
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Logo Direita (URL logo do cliente)</label>
