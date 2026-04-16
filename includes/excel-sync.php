@@ -102,13 +102,29 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
         'slug'       => $slug,
     ];
 
-    // Mapeia todas as respostas JSON para parâmetros individuais
+    // Mapeia respostas conforme a ORDEM das questões na configuração (para bater com o loop do Excel)
+    $questions_json = get_post_meta($surveys[0]->ID, 'questions_data', true) ?: '[]';
+    $questions = json_decode($questions_json, true);
+
+    if (is_array($questions) && is_array($answers)) {
+        $idx = 4; // Começa no 4 como no seu script
+        foreach ($questions as $q) {
+            $qid = isset($q['id']) ? $q['id'] : '';
+            if (empty($qid)) continue;
+
+            $val = isset($answers[$qid]) ? $answers[$qid] : '';
+            $mapa_dados['pergunta_' . $idx] = $val;
+            $idx++;
+        }
+    }
+
+    // Backup: Se houver respostas que não batem com a config atual, manda com ID original
     if (is_array($answers)) {
         foreach ($answers as $qid => $val) {
-            // Se o ID for numérico (pergunta-4), mantemos o padrão
-            // Se for ID gerado pelo builder (q_177...), mandamos como q_ID
-            $key = (is_numeric($qid)) ? 'pergunta_' . $qid : 'q_' . $qid;
-            $mapa_dados[$key] = $val;
+            $key = 'q_' . $qid;
+            if (!isset($mapa_dados[$key])) {
+                // $mapa_dados[$key] = $val; // Opcional: descomente se quiser enviar o ID bruto também
+            }
         }
     }
 
