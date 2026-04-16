@@ -1,25 +1,63 @@
 <?php
 /**
- * Lógica de sincronização com o Excel (Via Script Customizado do Usuário)
+ * Lógica de sincronização com o Excel (Dinamica)
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-// 1. Agendar o Cron (5 minutos) - Usando nomes únicos para evitar conflito com Code Snippets
-add_action('init', function() {
-    if (!wp_next_scheduled('rene_v2_excel_sync_cron')) {
-        wp_schedule_event(time(), 'rene_v2_five_minutes', 'rene_v2_excel_sync_cron');
-    }
-});
+// 1. Agendar o Cron com base nas configurações
+add_action('init', 'fswp_v2_reschedule_cron');
 
-add_filter('cron_schedules', function($schedules) {
-    if (!isset($schedules['rene_v2_five_minutes'])) {
-        $schedules['rene_v2_five_minutes'] = array('interval' => 300, 'display' => 'A cada 5 minutos (FormSync v2)');
+function fswp_v2_reschedule_cron() {
+    $interval_sec = fswp_v2_get_shortest_interval();
+    $hook = 'rene_v2_excel_sync_cron';
+
+    // Se o intervalo mudou, precisamos reagendar
+    $current_interval = get_option('fswp_current_sync_interval', 300);
+
+    if ($interval_sec != $current_interval || !wp_next_scheduled($hook)) {
+        wp_clear_scheduled_hook($hook);
+        wp_schedule_event(time(), 'fswp_dynamic_interval', $hook);
+        update_option('fswp_current_sync_interval', $interval_sec);
     }
+}
+
+// 2. Registrar o intervalo dinâmico no cron_schedules
+add_filter('cron_schedules', function($schedules) {
+    $interval_sec = get_option('fswp_current_sync_interval', 300);
+    $schedules['fswp_dynamic_interval'] = array(
+        'interval' => $interval_sec,
+        'display'  => 'Intervalo Dinâmico FormSync (' . $interval_sec . 's)'
+    );
     return $schedules;
 });
+
+/**
+ * Pega o menor intervalo configurado entre todas as pesquisas ativas
+ */
+function fswp_v2_get_shortest_interval() {
+    $surveys = get_posts(['post_type' => 'questionarios', 'posts_per_page' => -1]);
+    $min_sec = 300; // Default 5 min
+
+    foreach ($surveys as $s) {
+        $config_json = get_post_meta($s->ID, 'survey_config', true) ?: '{}';
+        $config = json_decode($config_json, true);
+        
+        if (!empty($config['spreadsheet_url']) && !empty($config['sync_interval'])) {
+            $val = intval($config['sync_interval']);
+            $unit = isset($config['sync_unit']) ? $config['sync_unit'] : 'minutes';
+            
+            $sec = $val;
+            if ($unit === 'minutes') $sec *= 60;
+            if ($unit === 'hours') $sec *= 3600;
+            
+            if ($sec > 0 && $sec < $min_sec) $min_sec = $sec;
+        }
+    }
+    return $min_sec;
+}
 
 add_action('rene_v2_excel_sync_cron', 'rene_v2_run_excel_sync');
 
@@ -27,22 +65,14 @@ add_action('rene_v2_excel_sync_cron', 'rene_v2_run_excel_sync');
  * Função principal disparada pelo Cron
  */
 function rene_v2_run_excel_sync() {
-    // Busca posts do CPT "respostas_survey" que ainda não foram sincronizados
     $args = array(
         'post_type'      => 'respostas_survey',
         'post_status'    => 'publish',
-        'posts_per_page' => 50,
+        'posts_per_page' => 100,
         'meta_query'     => array(
             'relation' => 'OR',
-            array(
-                'key'     => 'excel_sync_status',
-                'compare' => 'NOT EXISTS',
-            ),
-            array(
-                'key'     => 'excel_sync_status',
-                'value'   => 'pending',
-                'compare' => '=',
-            ),
+            array('key' => 'excel_sync_status', 'compare' => 'NOT EXISTS'),
+            array('key' => 'excel_sync_status', 'value' => 'pending', 'compare' => '='),
         ),
     );
 
@@ -52,20 +82,15 @@ function rene_v2_run_excel_sync() {
         while ($query->have_posts()) {
             $query->the_post();
             $post_id = get_the_ID();
-            
-            // Pega os dados
             $slug = get_post_meta($post_id, 'page_slug', true); 
             $answers_json = get_post_meta($post_id, 'survey_answers', true);
             $answers = json_decode($answers_json, true);
 
-            // Chama o handler de exportação
             $sync_result = rene_v2_custom_excel_handler($post_id, $slug, $answers);
 
             if ($sync_result) {
                 update_post_meta($post_id, 'excel_sync_status', 'synced');
                 update_post_meta($post_id, 'excel_sync_date', current_time('mysql'));
-            } else {
-                update_post_meta($post_id, 'excel_sync_status', 'failed');
             }
         }
         wp_reset_postdata();
@@ -73,10 +98,9 @@ function rene_v2_run_excel_sync() {
 }
 
 /**
- * Lógica adaptada do seu Snippet original para o novo formato do Plugin
+ * Handler de exportação
  */
 function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
-    // 1. Busca a configuração da pesquisa para pegar a URL da planilha
     $surveys = get_posts([
         'post_type' => 'questionarios',
         'meta_key' => 'page_slug',
@@ -91,7 +115,6 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
     
     if (empty($endpoint)) return false;
 
-    // 2. Prepara os dados para o Google Sheets (Estilo GET do seu Snippet)
     $raw_title = get_the_title($post_id);
     preg_match('/#(\d+)$/', $raw_title, $matches);
     $titulo = isset($matches[1]) ? '#' . $matches[1] : $raw_title;
@@ -102,41 +125,26 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
         'slug'       => $slug,
     ];
 
-    // Mapeia respostas conforme a ORDEM das questões na configuração (para bater com o loop do Excel)
     $questions_json = get_post_meta($surveys[0]->ID, 'questions_data', true) ?: '[]';
     $questions = json_decode($questions_json, true);
 
     if (is_array($questions) && is_array($answers)) {
-        $idx = 4; // Começa no 4 como no seu script
+        $idx = 4;
         foreach ($questions as $q) {
             $qid = isset($q['id']) ? $q['id'] : '';
             if (empty($qid)) continue;
-
             $val = isset($answers[$qid]) ? $answers[$qid] : '';
             $mapa_dados['pergunta_' . $idx] = $val;
             $idx++;
         }
     }
 
-    // Backup: Se houver respostas que não batem com a config atual, manda com ID original
-    if (is_array($answers)) {
-        foreach ($answers as $qid => $val) {
-            $key = 'q_' . $qid;
-            if (!isset($mapa_dados[$key])) {
-                // $mapa_dados[$key] = $val; // Opcional: descomente se quiser enviar o ID bruto também
-            }
-        }
-    }
-
-    // 3. Envia via GET (wp_remote_get)
     $url_final = add_query_arg(array_map('urlencode', $mapa_dados), $endpoint);
     $response = wp_remote_get($url_final, ['timeout' => 30]);
 
     if (is_wp_error($response)) return false;
-
     $code = wp_remote_retrieve_response_code($response);
     $body = wp_remote_retrieve_body($response);
 
-    // Critério de sucesso do seu Snippet original
     return ($code == 200 && strpos(strtolower($body), 'sucesso') !== false);
 }

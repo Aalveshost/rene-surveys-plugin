@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.1.4
+ * Version: 1.1.6
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -21,7 +21,7 @@ add_action('elementor/widgets/register', function($widgets_manager) {
     $widgets_manager->register(new FormSync_Elementor_Widget());
 });
 
-define('FSWP_VER', '1.1.0');
+define('FSWP_VER', '1.1.5');
 
 // 1. Enfileirar Scripts e Estilos para o Front-end
 add_action('wp_enqueue_scripts', 'rene_surveys_enqueue_scripts');
@@ -440,6 +440,18 @@ function formsync_render_frontend_builder() {
                             <label style="color: #996dff;">🔗 Planilha Webhook URL (Google Apps Script)</label>
                             <input type="text" id="cfg-spreadsheet-url" placeholder="https://script.google.com/macros/s/.../exec">
                             <p style="font-size:.72rem;color:#7a88a8;margin:3px 0 0 0;">💡 Configuração técnica: Respostas serão enviadas via GET.</p>
+                            
+                            <div style="margin-top:15px; border-top: 1px solid rgba(130,87,229,0.1); padding-top:10px;">
+                                <label style="font-size:0.75rem; color:#996dff;">⏱️ Frequência de Sincronização</label>
+                                <div style="display:flex; gap:8px;">
+                                    <input type="number" id="cfg-sync-interval" value="5" style="width:70px; height:32px;">
+                                    <select id="cfg-sync-unit" style="flex:1; height:32px; background:#1e1e22; border:1px solid #323238; color:#fff; border-radius:4px; padding:0 5px;">
+                                        <option value="seconds">Segundos</option>
+                                        <option value="minutes" selected>Minutos</option>
+                                        <option value="hours">Horas</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="fswp-cfg-row">
                             <label>Logo Esquerda (URL da imagem — fixo SSP/seu logo)</label>
@@ -767,6 +779,8 @@ function formsync_render_frontend_builder() {
             } catch (e) { cfg = {}; }
             $i('cfg-logo-left').value  = cfg.logo_left    || '';
             $i('cfg-spreadsheet-url').value = cfg.spreadsheet_url || '';
+            $i('cfg-sync-interval').value = cfg.sync_interval || '5';
+            $i('cfg-sync-unit').value = cfg.sync_unit || 'minutes';
             $i('cfg-logo-right').value = cfg.logo_right   || '';
             $i('cfg-logo-right-cover').checked = cfg.logo_right_cover || false;
             $i('cfg-title').value      = cfg.title        || '';
@@ -940,6 +954,8 @@ function formsync_render_frontend_builder() {
             const config = {
                 logo_left       : $i('cfg-logo-left').value.trim(),
                 spreadsheet_url : $i('cfg-spreadsheet-url').value.trim(),
+                sync_interval   : $i('cfg-sync-interval').value || '5',
+                sync_unit       : $i('cfg-sync-unit').value || 'minutes',
                 logo_right      : $i('cfg-logo-right').value.trim(),
                 logo_right_cover: $i('cfg-logo-right-cover').checked,
                 title           : $i('cfg-title').value.trim(),
