@@ -21,6 +21,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const hasIntro = !!(config.title || config.subtitle || config.description);
     let onIntro = hasIntro;
 
+    // ── Check Dates (Enforcement) ──────────────────────────────────────
+    const now = new Date();
+    now.setHours(0,0,0,0);
+    const startDate = config.start_date ? new Date(config.start_date + 'T00:00:00') : null;
+    const endDate   = config.end_date   ? new Date(config.end_date + 'T00:00:00')   : null;
+
+    let isUpcoming = false;
+    let isExpired  = false;
+
+    if (startDate && now < startDate) {
+        isUpcoming = true;
+    }
+    if (endDate && now > endDate) {
+        isExpired = true;
+    }
+
+    if (isExpired) {
+        renderStatusPage(`Esta pesquisa foi encerrada em ${formatDate(config.end_date)}.`);
+        return;
+    }
+
     // ── Divide em páginas pelo marcador page_break ─────────────────────
     const pages = [];
     let buf = [];
@@ -31,6 +52,26 @@ document.addEventListener('DOMContentLoaded', function () {
             buf.push(q);
         }
     });
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    function renderStatusPage(msg) {
+        appDiv.innerHTML = `
+        <div class="survey-intro">
+            ${getHeaderHtml(false)}
+            <div class="survey-intro-body" style="text-align:center; padding: 60px 40px;">
+                <div class="survey-success-icon" style="background:#fef3f2; color:#f04438;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <h2 class="survey-intro-subtitle" style="color:#333; margin-bottom:12px;">Pesquisa Indisponível</h2>
+                <p style="color:#667085; font-size:1.1rem; line-height:1.5;">${msg}</p>
+            </div>
+        </div>`;
+    }
 
     // ── Página de Apresentação ─────────────────────────────────────────
     function getHeaderHtml(isSmall) {
@@ -77,6 +118,13 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>`;
         }
 
+        let footerHtml = `<button class="btn-premium" id="fswp-btn-seguinte">Seguinte</button>`;
+        if (isUpcoming) {
+            footerHtml = `<div class="survey-upcoming-msg" style="background:#f9fafb; padding:16px; border-radius:8px; border:1px solid #eaecf0; color:#475467; text-align:center;">
+                <strong>Aguarde o início:</strong> Esta pesquisa estará disponível em ${formatDate(config.start_date)}.
+            </div>`;
+        }
+
         appDiv.innerHTML = `
         <div class="survey-intro">
             ${getHeaderHtml(false)}
@@ -86,19 +134,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${instHtml}
                 ${config.period      ? `<p class="survey-intro-period">Período de aplicação da pesquisa: ${parseMarkdown(config.period)}</p>` : ''}
                 <div class="survey-intro-footer">
-                    <button class="btn-premium" id="fswp-btn-seguinte">Seguinte</button>
+                    ${footerHtml}
                 </div>
             </div>
         </div>`;
 
-        document.getElementById('fswp-btn-seguinte').addEventListener('click', () => {
-            onIntro = false;
-            if (pages.length) {
-                renderPage(0);
-            } else {
-                appDiv.innerHTML = '<p class="empty-msg">Nenhuma pergunta encontrada.</p>';
-            }
-        });
+        if (!isUpcoming) {
+            document.getElementById('fswp-btn-seguinte').addEventListener('click', () => {
+                onIntro = false;
+                if (pages.length) {
+                    renderPage(0);
+                } else {
+                    appDiv.innerHTML = '<p class="empty-msg">Nenhuma pergunta encontrada.</p>';
+                }
+            });
+        }
     }
 
     if (buf.length) pages.push(buf);
@@ -152,7 +202,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 html += `<h2 class="section-label">${label}</h2>`;
             } else {
                 qNum++;
-                html += `<label class="question-label"><span>${qNum}.</span> ${label}</label>`;
+                const requiredMarker = q.required ? '<span style="color:#f04438; margin-left:4px;">*</span>' : '';
+                html += `<label class="question-label"><span>${qNum}.</span> ${label}${requiredMarker}</label>`;
             }
 
             if (q.type === 'multiple') {
@@ -308,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (q.type === 'text') {
                 answered = !!(answers[q.id] && answers[q.id].trim());
             }
-            if (!answered) {
+            if (q.required && !answered) {
                 block.classList.add('question-error');
                 valid = false;
             }

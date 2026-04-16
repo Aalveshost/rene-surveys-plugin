@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FormSync Excel WP
  * Description: Sistema dinâmico de pesquisas de segurança do trabalho com sincronização para Excel. No Elementor, arraste o widget <strong>FormSync Excel WP</strong>. Em outros construtores, use o shortcode <strong>[render_survey page_slug="slug-da-pagina"]</strong>.
- * Version: 1.0.56
+ * Version: 1.0.57
  * Author: Alef Alves
  * Author URI: https://aalves.dev
  * Text Domain: formsync-excel-wp
@@ -416,6 +416,14 @@ function formsync_render_frontend_builder() {
                     <div class="fswp-slug-wrap">
                         <label for="fswp-edit-slug">Slug:</label>
                         <input type="text" id="fswp-edit-slug" placeholder="ex: vinci">
+                        <div class="fswp-date-field">
+                            <label>Início (Opcional):</label>
+                            <input id="cfg-start-date" type="date">
+                        </div>
+                        <div class="fswp-date-field">
+                            <label>Término (Opcional):</label>
+                            <input id="cfg-end-date" type="date">
+                        </div>
                     </div>
                 </div>
 
@@ -516,14 +524,19 @@ function formsync_render_frontend_builder() {
     .fswp-survey-item:hover{border-color:#8257e5;}
     .fswp-survey-info strong{display:block;color:#e1e1e6;font-size:.9rem;}
     .fswp-survey-info span{color:#8257e5;font-size:.78rem;font-family:monospace;}
-    .fswp-slug-wrap{display:flex;align-items:center;gap:8px;}
-    .fswp-slug-wrap label{color:#a9a9b2;font-size:.82rem;white-space:nowrap;}
-    .fswp-slug-wrap input{
-        background:#121214;border:1px solid #323238;border-radius:6px;
-        color:#e1e1e6;padding:6px 10px;font-size:.88rem;
-    }
-    .fswp-slug-wrap input:focus{outline:none;border-color:#8257e5;}
     .fswp-slug-wrap input[readonly]{opacity:.5;cursor:not-allowed;}
+    .fswp-date-field{display:flex;flex-direction:column;gap:3px;}
+    .fswp-date-field label{font-size:.65rem;color:#7a88a8;font-weight:600;}
+    .fswp-date-field input{
+        background:#121214;border:1px solid #323238;border-radius:6px;
+        color:#e1e1e6;padding:4px 8px;font-size:.82rem;
+    }
+    .fswp-q-required-label{
+        display:flex;align-items:center;gap:4px;
+        font-size:.72rem;color:#a9a9b2;cursor:pointer;
+        margin-left:auto;user-select:none;
+    }
+    .fswp-q-required-label input{margin:0;}
     .fswp-q-card{
         background:#121214;border:1px solid #323238;border-radius:10px;
         margin-bottom:10px;overflow:hidden;
@@ -729,6 +742,8 @@ function formsync_render_frontend_builder() {
             $i('cfg-title').value      = cfg.title        || '';
             $i('cfg-subtitle').value   = cfg.subtitle     || '';
             $i('cfg-description').value= (cfg.description || '').replace(/\\n/g, '\n');
+            $i('cfg-start-date').value = cfg.start_date   || '';
+            $i('cfg-end-date').value   = cfg.end_date     || '';
             renderQuestions();
             showView('editor');
         }
@@ -813,6 +828,9 @@ function formsync_render_frontend_builder() {
                             <option value="multiple"${q.type==='multiple'?' selected':''}>Múltipla Escolha</option>
                             <option value="text"${q.type==='text'?' selected':''}>Descritiva</option>
                         </select>
+                        <label class="fswp-q-required-label">
+                            <input type="checkbox" class="fswp-q-required" data-qi="${qi}" ${q.required?'checked':''}> Obrigatória
+                        </label>
                         <button class="fswp-btn-rm-q" data-qi="${qi}" title="Remover questão">🗑</button>
                     </div>
                     <div class="fswp-q-label-wrap">
@@ -865,6 +883,7 @@ function formsync_render_frontend_builder() {
             // ── Outros eventos ───────────────────────────────────────────
             c.querySelectorAll('.fswp-btn-rm-pb').forEach(el=>el.addEventListener('click',function(){ questions.splice(+this.dataset.qi,1); renderQuestions(); }));
             c.querySelectorAll('.fswp-q-label').forEach(el=>el.addEventListener('input',function(){ questions[+this.dataset.qi].label=this.value; }));
+            c.querySelectorAll('.fswp-q-required').forEach(el=>el.addEventListener('change',function(){ questions[+this.dataset.qi].required=this.checked; }));
             c.querySelectorAll('.fswp-q-type').forEach(el=>el.addEventListener('change',function(){
                 const q=questions[+this.dataset.qi];
                 q.type=this.value;
@@ -895,6 +914,8 @@ function formsync_render_frontend_builder() {
                 title           : $i('cfg-title').value.trim(),
                 subtitle        : $i('cfg-subtitle').value.trim(),
                 description     : $i('cfg-description').value.replace(/\n/g, '\\n'),
+                start_date      : $i('cfg-start-date').value,
+                end_date        : $i('cfg-end-date').value,
             };
             const isNew = !$i('fswp-edit-slug').readOnly;
             const btn=this;
