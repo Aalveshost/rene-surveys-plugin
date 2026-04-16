@@ -137,7 +137,7 @@ function rene_v2_custom_excel_handler($post_id, $slug, $answers) {
 
     $mapa_dados = [
         'post_title' => $titulo,
-        'timestamp'  => current_time('mysql'),
+        'timestamp'  => current_time('d/m/Y - H:i'),
         'empresa'    => $empresa_nome,
     ];
 
