@@ -12,7 +12,8 @@
    PÁGINA DE APRESENTAÇÃO
 ═══════════════════════════════════════════════════ */
 .survey-intro {
-    max-width: 860px;
+    max-width: 1120px;
+    width: 90vw;
     margin: 0 auto;
     border-radius: 10px;
     overflow: hidden;
@@ -192,7 +193,7 @@
 
 
 .survey-form-premium {
-    max-width: 860px;
+    max-width: 100%;
     margin: 0 auto;
     background: transparent;
     padding: 0;
